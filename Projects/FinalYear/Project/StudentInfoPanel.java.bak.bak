@@ -1,0 +1,169 @@
+//package Project;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.border.*;
+//import Project.controls.*;
+import java.util.*;
+
+
+interface StudentInfoConstants
+{
+	String firstname="FIRST NAME:";
+	String middleName="MIDDLE NAME:";
+	String lastName="LAST NAME:";
+	String dob="DATA OF BIRTH:";
+	String adhar="ADHAR-CARD NO:";
+	String phone="PH";
+	String address="ADDRESS:";
+	String flat="FLAT/ROOM";
+	String building="BUILDING";
+	String street="STREET";
+	String landMark="LANDMARK";
+	String city="CITY";
+	String pin="PINCODE";
+	String next="NEXT";
+	String back="BACK";
+	String day="DD";
+	String month="MM";
+	String year="YYYY";
+}
+
+public class StudentInfoPanel extends JPanel implements StudentInfoConstants
+{
+	JLabel lblFirstName,lblMiddleName,lblLastName,lblDob,lblAdhar,lblPhone,lblAddress,lblFlat,lblBuilding,lblStreet,lblLandMark,lblCity,lblPin,lblDay,lblMonth,lblYear;
+	MyTextField firstNameTxt,middleNameTxt,lastNameTxt,adharTxt,phoneTxt,flatTxt,buildingTxt,streetTxt,landMarkTxt,cityTxt,pinTxt;
+	JButton nextBt,backBt;
+	JSpinner spDay,spMonth,spYear;
+	SpinnerNumberModel spmD,spmM;
+	SpinnerListModel spmY;
+	JFrame obj;
+	String yearArr[]=new String[50];
+
+	public StudentInfoPanel(JFrame ref)
+	{
+		ref=obj;
+		setLayout(new GridLayout(18,3,10,4));
+		initializeAll();
+		createAndMakePanels();
+		setBackground(new Color(204,204,204));
+	}
+	void initializeAll()
+	{
+		//NAME PANEL
+		lblFirstName=new JLabel(firstname);
+		lblMiddleName=new JLabel(middleName);
+		lblLastName=new JLabel(lastName);
+		firstNameTxt=new MyTextField(obj);
+		middleNameTxt=new MyTextField(obj);
+		lastNameTxt=new MyTextField(obj);
+
+		//DOB PANEL
+		lblDob=new JLabel(dob);
+		lblDay=new JLabel(day);
+		lblMonth=new JLabel(month);
+		lblYear=new JLabel(year);
+		spmD=new SpinnerNumberModel(1,1,31,1);
+		spmM=new SpinnerNumberModel(1,1,12,1);
+		for (int i=1990,j=0;i<2017;i++,j++)
+			yearArr[j]=new Integer(i).toString();
+		spmY=new SpinnerListModel();
+		spDay=new JSpinner(spmD);
+		spMonth=new JSpinner(spmM);
+		spYear=new JSpinner(spmY);
+
+		//ADHAR PANEL
+		adharTxt=new MyTextField(obj);
+		lblAdhar=new JLabel(adhar);
+
+		//PHONE PANEL
+		lblPhone=new JLabel(phone);
+		phoneTxt=new MyTextField(obj);
+
+		//ADDRESS PANE
+		lblAddress=new JLabel(address);
+		lblFlat=new JLabel(flat);
+		lblBuilding=new JLabel(building);
+		lblStreet=new JLabel(street);
+		lblLandMark=new JLabel(landMark);
+		lblCity=new JLabel(city);
+		lblPin=new JLabel(pin);
+		flatTxt=new MyTextField(obj);
+		buildingTxt=new MyTextField(obj);
+		streetTxt=new MyTextField(obj);
+		landMarkTxt=new MyTextField(obj);
+		cityTxt=new MyTextField(obj);
+		pinTxt=new MyTextField(obj);
+	}
+	void createAndMakePanels()
+	{
+		add(lblLastName);
+		add(lblFirstName);
+		add(lblMiddleName);
+		add(lastNameTxt);
+		add(firstNameTxt);
+		add(middleNameTxt);
+
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+
+		add(lblDob);
+		add(new JLabel());
+		add(new JLabel());
+		add(lblDay);
+		add(lblMonth);
+		add(lblYear);
+		add(spDay);
+		add(spMonth);
+		add(spYear);
+
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+		
+		add(lblAdhar);
+		add(new JLabel());
+		add(new JLabel());
+		add(adharTxt);
+		add(new JLabel());
+		add(new JLabel());
+
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+
+		add(lblPhone);
+		add(new JLabel());
+		add(new JLabel());
+		add(phoneTxt);
+		add(new JLabel());
+		add(new JLabel());
+
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+		add(new JLabel(new ImageIcon("Line.png")));
+
+
+		add(lblAddress);
+		add(new JLabel());
+		add(new JLabel());
+		add(lblFlat);
+		add(lblBuilding);
+		add(lblStreet);
+		add(flatTxt);
+		add(buildingTxt);
+		add(streetTxt);
+		add(lblLandMark);
+		add(lblCity);
+		add(lblPin);
+		add(landMarkTxt);
+		add(cityTxt);
+		add(pinTxt);
+	}
+	public Insets getInsets()
+	{
+		return new Insets(10,10,10,10);
+	}
+}

@@ -1,0 +1,46 @@
+<synth>
+
+<!-- 
+*******************************************************************************
+Rectangular ScrollBar
+*******************************************************************************
+-->
+  <style id="scrollBarThumb">
+    <state>
+      <string id="scrollBarThumbXBackground">blackeye/images/scrollBarThumbXRect.png</string>
+      <defaultsProperty key="Synthetica.scrollBarThumb.x.background" type="idref" value="scrollBarThumbXBackground"/>
+
+      <string id="scrollBarThumbXBackgroundHover">blackeye/images/scrollBarThumbXRect_hover.png</string>
+      <defaultsProperty key="Synthetica.scrollBarThumb.x.background.hover" type="idref" value="scrollBarThumbXBackgroundHover"/>
+
+      <string id="scrollBarThumbYBackground">blackeye/images/scrollBarThumbYRect.png</string>
+      <defaultsProperty key="Synthetica.scrollBarThumb.y.background" type="idref" value="scrollBarThumbYBackground"/>
+
+      <string id="scrollBarThumbYBackgroundHover">blackeye/images/scrollBarThumbYRect_hover.png</string>
+      <defaultsProperty key="Synthetica.scrollBarThumb.y.background.hover" type="idref" value="scrollBarThumbYBackgroundHover"/>
+
+      <defaultsProperty key="Synthetica.scrollBarThumb.background.insets" type="insets" value="4 4 4 4"/>
+    </state>
+  </style>
+  <bind style="scrollBarThumb" type="region" key="ScrollBarThumb"/>
+
+  <style id="scrollBarTrack">
+    <state>
+      <string id="scrollBarTrackXBackground">blackeye/images/scrollBarTrackXRect_hover4.png,blackeye/images/scrollBarTrackXRect_hover3.png,blackeye/images/scrollBarTrackXRect_hover2.png,blackeye/images/scrollBarTrackXRect_hover.png,blackeye/images/scrollBarTrackXRect.png</string>
+      <defaultsProperty key="Synthetica.scrollBarTrack.x.background" type="idref" value="scrollBarTrackXBackground"/>
+
+      <string id="scrollBarTrackXBackgroundHover">blackeye/images/scrollBarTrackXRect_hover.png,blackeye/images/scrollBarTrackXRect_hover2.png,blackeye/images/scrollBarTrackXRect_hover3.png,blackeye/images/scrollBarTrackXRect_hover4.png,blackeye/images/scrollBarTrackXRect_hover5.png</string>
+      <defaultsProperty key="Synthetica.scrollBarTrack.x.background.hover" type="idref" value="scrollBarTrackXBackgroundHover"/>
+
+      <string id="scrollBarTrackYBackground">blackeye/images/scrollBarTrackYRect_hover4.png,blackeye/images/scrollBarTrackYRect_hover3.png,blackeye/images/scrollBarTrackYRect_hover2.png,blackeye/images/scrollBarTrackYRect_hover.png,blackeye/images/scrollBarTrackYRect.png</string>
+      <defaultsProperty key="Synthetica.scrollBarTrack.y.background" type="idref" value="scrollBarTrackYBackground"/>
+
+      <string id="scrollBarTrackYBackgroundHover">blackeye/images/scrollBarTrackYRect_hover.png,blackeye/images/scrollBarTrackYRect_hover2.png,blackeye/images/scrollBarTrackYRect_hover3.png,blackeye/images/scrollBarTrackYRect_hover4.png,blackeye/images/scrollBarTrackYRect_hover5.png</string>
+      <defaultsProperty key="Synthetica.scrollBarTrack.y.background.hover" type="idref" value="scrollBarTrackYBackgroundHover"/>
+
+      <defaultsProperty key="Synthetica.scrollBarTrack.background.insets" type="insets" value="4 4 4 4"/>
+    </state>
+  </style>
+  <bind style="scrollBarTrack" type="region" key="ScrollBarTrack"/>
+
+</synth>

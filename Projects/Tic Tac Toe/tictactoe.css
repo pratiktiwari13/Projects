@@ -1,0 +1,47 @@
+body
+{
+    height: 100%;
+    width:100%;
+    background: linear-gradient(#EDE574,#E1F5C4);
+}
+#container
+{
+    width:610px;
+    height:700px;
+    margin:40px auto;
+}
+#blocks
+{
+    width:610px;
+    height:610px;
+    margin-top:50px;
+}
+#radio-buttons
+{
+    text-align: center;
+}
+#radio-buttons>input
+{
+    height:20px;
+    width:40px;
+}
+#radio-buttons>label
+{
+    font-family: cursive,sans-serif;
+    font-size: 30px;
+}
+.box{
+    display: inline-block;
+    width:25%;
+	box-sizing: border-box;
+    padding: 20px auto;
+	margin: 3%;
+    background-color: azure;
+    font-size: 110px;
+    text-align: center;
+/*    line-height: 200px;*/
+    font-family: cursive,sans-serif;
+    color:burlywood;
+    cursor: pointer;
+}
+

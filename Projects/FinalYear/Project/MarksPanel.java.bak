@@ -1,0 +1,179 @@
+package Project;
+import java.awt.*;
+import java.awt.event.*;
+import MyControls.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.sql.*;
+
+interface LineImageResource
+{
+	ImageIcon lineGraphics=new ImageIcon("C:\\Users\\admin\\Downloads\\Line.jpg");
+}
+public class MarksPanel extends JPanel implements ItemListener,LineImageResource,ActionListener,FocusListener
+{
+	JLabel lineLabel=new JLabel(lineGraphics);
+	JLabel radioButtonStatus,lblEng,lblMath,lblSci;
+	JRadioButton isTenth,isDSY;
+	ButtonGroup bg;
+	JPanel tenthPanel,dsyPanel;
+	JPanel tenthdsy,RadPanel;
+	MyTextField txtSci,txtMath,txtEng;
+	JButton tenthSheet,dsysheet;
+	CardLayout cd=new CardLayout();
+	String status=null;
+	public MarksPanel()
+	{
+		setLayout(new BorderLayout());
+		initComponents();
+		//showMainPanel();
+	}
+	private void initComponents()
+	{
+		txtSci=new MyTextField("",10,Color.BLACK);
+		txtSci.addFocusListener(this);
+		txtMath=new MyTextField("",10,Color.BLACK);
+		txtMath.addFocusListener(this);
+		txtEng=new MyTextField("",10,Color.BLACK);
+		txtEng.addFocusListener(this);
+		
+		lblEng=new JLabel("English");
+		lblMath=new JLabel("Maths");
+		lblSci=new JLabel("Science");
+		
+		tenthSheet=new JButton("Add Marksheet");
+		dsysheet=new JButton("Add Marksheet");
+		bg=new ButtonGroup();
+		
+		radioButtonStatus=new JLabel("Select appropriate course");
+		isTenth=new JRadioButton("10th?",true);
+		isDSY=new JRadioButton("DSY?",false);
+		isTenth.addItemListener(this);
+		isDSY.addItemListener(this);
+		bg.add(isTenth);
+		bg.add(isDSY);
+		tenthPanel=new JPanel();
+		dsyPanel=new JPanel();
+		tenthPanel.setLayout(new GridLayout(8,1));
+		isDSY.setLayout(new FlowLayout());
+		
+		tenthPanel.add(lblSci);
+		tenthPanel.add(txtSci);
+		tenthPanel.add(lblMath);
+		tenthPanel.add(txtMath);
+		tenthPanel.add(lblEng);
+		tenthPanel.add(txtEng);
+		tenthPanel.add(tenthSheet);
+		
+		dsyPanel.add(dsysheet);
+		
+		tenthdsy=new JPanel();
+		tenthdsy.setLayout(cd);
+		tenthdsy.add(tenthPanel,"Tenth");
+		tenthdsy.add(dsyPanel,"HSC");
+		//tenthdsy.setVisible(false);
+		
+		RadPanel=new JPanel();
+		RadPanel.setLayout(new FlowLayout());
+		RadPanel.add(isTenth);
+		RadPanel.add(isDSY);
+		
+		status="Tenth";
+		
+		addAllPanels();
+	}
+	private void addAllPanels()
+	{
+		add(radioButtonStatus,BorderLayout.NORTH);
+		add(RadPanel,BorderLayout.CENTER);
+		add(tenthdsy,BorderLayout.SOUTH);
+	}
+	public void itemStateChanged(ItemEvent ie)
+	{
+		JRadioButton jb=(JRadioButton)ie.getSource();
+		if(isTenth.isSelected())
+		{
+			status="Tenth";
+			cd.show(tenthdsy,"Tenth");
+		}
+		else if(isDSY.isSelected())
+		{
+			status="HSC";
+			cd.show(tenthdsy,"HSC");
+		}
+	}
+	public Insets getInsets()
+	{
+		return new Insets(50,50,50,50);
+	}
+	
+	public void actionPerformed(ActionEvent a)
+	{
+		if(status.equals("Tenth"))
+		{
+			
+		}
+		else if(status.equals("HSC"))
+		{
+			
+		}
+	}
+	public void focusGained(FocusEvent fe)
+	{
+		MyTextField mtf=(MyTextField)fe.getSource();
+		mtf.changeColor(Color.BLUE);
+	}
+	public void focusLost(FocusEvent fe)
+	{
+		MyTextField mtf=(MyTextField)fe.getSource();
+		if(mtf.getText().length()==0)
+			mtf.changeColor(Color.RED);
+		else
+			mtf.changeColor(Color.GREEN);			
+	}
+	public boolean validateMarks()
+	{
+		if(txtEng.getText().length()>0 && txtSci.getText().length()>0 && txtMath.getText().length()>0)
+			return true;
+		else
+			return false;
+	}
+	public void insertInDB()
+	{
+		System.out.println("Adding data in Marks");
+		try
+		{
+		Connection con=DriverManager.getConnection("jdbc:odbc:StudentDB");
+		PreparedStatement ps=con.prepareStatement("insert into Marks values (?,?,?,?,?)");
+		ps.setString(1,""+EntryPanel.enroll);
+		ps.setString(2,txtMath.getText());
+		ps.setString(3,txtSci.getText());
+		ps.setString(4,""+isDSY.isSelected());
+		ps.setString(5,txtEng.getText());	
+		ps.close();
+		con.close();
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+		}
+		System.out.println("Added Data in marks");
+	}
+}
+class MarksDriver extends Frame
+{
+	MarksDriver()
+	{
+		setLayout(new GridLayout(1,1));
+		setBounds(0,0,400,400);
+		add(new MarksPanel());
+		setVisible(true);
+	}
+	
+	public static void main(String[] args)
+	{
+		new MarksDriver();
+	}
+}

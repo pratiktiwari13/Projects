@@ -1,0 +1,1723 @@
+/*      */ 
+/*      */ 
+/*      */ de.javasoft.plaf.synthetica.painter.RootPanePainter
+/*      */ de.javasoft.plaf.synthetica.painter.SyntheticaPainter
+/*      */ de.javasoft.util.JavaVersion
+/*      */ de.javasoft.util.OS
+/*      */ java.awt.AWTEvent
+/*      */ java.awt.Component
+/*      */ java.awt.ComponentOrientation
+/*      */ java.awt.Container
+/*      */ java.awt.Cursor
+/*      */ java.awt.Dialog
+/*      */ java.awt.Dimension
+/*      */ java.awt.Frame
+/*      */ java.awt.Graphics
+/*      */ java.awt.GraphicsConfiguration
+/*      */ java.awt.GraphicsDevice
+/*      */ java.awt.GraphicsEnvironment
+/*      */ java.awt.HeadlessException
+/*      */ java.awt.Insets
+/*      */ java.awt.LayoutManager
+/*      */ java.awt.LayoutManager2
+/*      */ java.awt.MouseInfo
+/*      */ java.awt.Point
+/*      */ java.awt.PointerInfo
+/*      */ java.awt.Rectangle
+/*      */ java.awt.Toolkit
+/*      */ java.awt.Window
+/*      */ java.awt.event.AWTEventListener
+/*      */ java.awt.event.ComponentAdapter
+/*      */ java.awt.event.ComponentEvent
+/*      */ java.awt.event.ComponentListener
+/*      */ java.awt.event.MouseEvent
+/*      */ java.awt.event.WindowAdapter
+/*      */ java.awt.event.WindowEvent
+/*      */ java.awt.event.WindowListener
+/*      */ java.beans.PropertyChangeEvent
+/*      */ java.beans.PropertyChangeListener
+/*      */ java.lang.ref.WeakReference
+/*      */ java.lang.reflect.Method
+/*      */ java.security.AccessController
+/*      */ java.security.PrivilegedActionException
+/*      */ java.security.PrivilegedExceptionAction
+/*      */ javax.swing.JComponent
+/*      */ javax.swing.JDialog
+/*      */ javax.swing.JFrame
+/*      */ javax.swing.JLayeredPane
+/*      */ javax.swing.JMenuBar
+/*      */ javax.swing.JRootPane
+/*      */ javax.swing.JWindow
+/*      */ javax.swing.MenuElement
+/*      */ javax.swing.SwingUtilities
+/*      */ javax.swing.border.Border
+/*      */ javax.swing.event.MouseInputListener
+/*      */ javax.swing.plaf.ComponentUI
+/*      */ javax.swing.plaf.basic.BasicRootPaneUI
+/*      */ javax.swing.plaf.synth.Region
+/*      */ javax.swing.plaf.synth.SynthContext
+/*      */ javax.swing.plaf.synth.SynthPainter
+/*      */ 
+/*      */ SyntheticaRootPaneUI
+/*      */   
+/*      */ 
+/*      */   window
+/*      */   rootPane
+/*      */   layoutManager
+/*      */   oldLayoutManager
+/*      */   awtMouseListener
+/*      */   mouseInputListener
+/*      */   windowListener
+/*      */   windowShapeResizeListener
+/*      */   windowMenuBarResizeListener
+/*      */   rootPaneResizeListener
+/*      */   mouseEventProcessor
+/*      */   titlePane
+/*      */   resizeInsets
+/*      */   EVAL_COPY = 
+/*      */   EVAL_HEIGHT = 16
+/*      */   EVAL_TEXT = ""
+/*      */   
+/*      */   SnapState
+/*      */   
+/*   79 */     SNAP_LEFT, SNAP_RIGHT, SNAP_HEIGHT, SNAP_MAXIMIZED, SNAP_TOP_LEFT, SNAP_TOP_RIGHT, SNAP_BOTTOM_LEFT, SNAP_BOTTOM_RIGHT
+/*      */   
+/*      */   
+/*      */   HeaderShadowType
+/*      */   
+/*   80 */     NONE, NORMAL, SHADOW_COMPONENT_MENUBAR_ONLY, SHADOW_COMPONENT_ONLY, TITLEPANE_ONLY
+/*      */   
+/*      */   
+/*   97 */   snapThreshold = 12
+/*   98 */   snapHeightThreshold = 24
+/*   99 */   snapCornerSize = 24
+/*      */   snapState
+/*      */   preSnapBounds
+/*      */   headerShadowComponent
+/*      */   headerShadow
+/*      */   
+/*      */   createUI
+/*      */   
+/*  110 */     ()
+/*      */   
+/*      */   
+/*      */   isEvalCopy
+/*      */   
+/*  117 */     
+/*      */   
+/*      */   
+/*      */   installUI
+/*      */   
+/*  124 */     installUI
+/*  125 */     rootPane = ((JRootPane)paramJComponent);
+/*  126 */     if (isDecorated(this.rootPane)) {
+/*  127 */       installClientDecorations(this.rootPane);
+/*      */     }
+/*  128 */     if (isHeaderShadowEnabled()) {
+/*  129 */       installHeaderListener(this.rootPane);
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   public void uninstallUI(JComponent paramJComponent)
+/*      */   {
+/*  137 */     super.uninstallUI(paramJComponent);
+/*  138 */     uninstallClientDecorations(this.rootPane);
+/*  139 */     uninstallHeaderListener(this.rootPane);
+/*  140 */     this.rootPane = null;
+/*      */   }
+/*      */   
+/*      */   private void installClientDecorations(JRootPane paramJRootPane)
+/*      */   {
+/*  147 */     SyntheticaTitlePane localSyntheticaTitlePane = new SyntheticaTitlePane(paramJRootPane, this);
+/*  148 */     setTitlePane(paramJRootPane, localSyntheticaTitlePane);
+/*  149 */     installBorder(paramJRootPane);
+/*  150 */     installWindowListeners(paramJRootPane, paramJRootPane.getParent());
+/*  151 */     installLayout(paramJRootPane);
+/*      */     String str;
+/*      */     Container localContainer;
+/*  152 */     if (((this.window instanceof Dialog)) && (SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.dialogStyle.enabled", this.window, false)) && (SyntheticaLookAndFeel.getClientProperty("Synthetica.style", this.rootPane, null) == null))
+/*      */     {
+/*  154 */       str = SyntheticaLookAndFeel.getString("Synthetica.rootPane.dialogStyle.defaultName", this.window, "Dialog");
+/*  155 */       this.rootPane.putClientProperty("Synthetica.style", str);
+/*  156 */       localContainer = this.rootPane.getContentPane();
+/*  157 */       if ((localContainer != null) && (localContainer.getName().startsWith("null."))) {}
+/*  158 */       localContainer.setName(str + ".contentPane");
+/*      */     }
+/*  160 */     else if (((this.window instanceof Frame)) && (SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.frameStyle.enabled", this.window, false)) && (SyntheticaLookAndFeel.getClientProperty("Synthetica.style", this.rootPane, null) == null))
+/*      */     {
+/*  162 */       str = SyntheticaLookAndFeel.getString("Synthetica.rootPane.frameStyle.defaultName", this.window, "Frame");
+/*  163 */       this.rootPane.putClientProperty("Synthetica.style", str);
+/*  164 */       localContainer = this.rootPane.getContentPane();
+/*  165 */       if ((localContainer != null) && (localContainer.getName().startsWith("null."))) {}
+/*  166 */       localContainer.setName(str + ".contentPane");
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void uninstallClientDecorations(JRootPane paramJRootPane)
+/*      */   {
+/*  174 */     if ((this.titlePane != null) && ((this.titlePane instanceof SyntheticaTitlePane))) {
+/*  175 */       ((SyntheticaTitlePane)this.titlePane).uninstallListeners(paramJRootPane);
+/*      */     }
+/*  176 */     setTitlePane(paramJRootPane, null);
+/*  177 */     uninstallBorder(paramJRootPane);
+/*  178 */     uninstallWindowListeners(paramJRootPane);
+/*  179 */     uninstallLayout(paramJRootPane);
+/*      */   }
+/*      */   
+/*      */   public JComponent getTitlePane()
+/*      */   {
+/*  189 */     return this.titlePane;
+/*      */   }
+/*      */   
+/*      */   void installBorder(JRootPane paramJRootPane)
+/*      */   {
+/*  196 */     if (isDecorated(paramJRootPane)) {
+/*  198 */       paramJRootPane.setBorder(new Border()
+/*      */       {
+/*      */         public void paintBorder(Component paramAnonymousComponent, Graphics paramAnonymousGraphics, int paramAnonymousInt1, int paramAnonymousInt2, int paramAnonymousInt3, int paramAnonymousInt4)
+/*      */         {
+/*  202 */           SynthContext localSynthContext = SyntheticaLookAndFeel.createContext((JComponent)paramAnonymousComponent, Region.ROOT_PANE, 0);
+/*  203 */           SyntheticaPainter.getInstance().paintRootPaneBorder(localSynthContext, paramAnonymousGraphics, paramAnonymousInt1, paramAnonymousInt2, paramAnonymousInt3, paramAnonymousInt4);
+/*      */         }
+/*      */         
+/*      */         public Insets getBorderInsets(Component paramAnonymousComponent)
+/*      */         {
+/*  209 */           if (SyntheticaRootPaneUI.this.isMaximized(SyntheticaRootPaneUI.this.window)) {
+/*  210 */             return new Insets(0, 0, 0, 0);
+/*      */           }
+/*  212 */           Insets localInsets = SyntheticaRootPaneUI.this.getDefaultBorderInsets();
+/*      */           
+/*      */ 
+/*  215 */           localInsets = (Insets)localInsets.clone();
+/*  216 */           localInsets.bottom += 16;
+/*  217 */           localInsets.left += SyntheticaLookAndFeel.getInt("Synthetica.rootPane.margin.left", SyntheticaRootPaneUI.this.window, 0);
+/*      */           
+/*      */ 
+/*  220 */           return localInsets;
+/*      */         }
+/*      */         
+/*      */         public boolean isBorderOpaque()
+/*      */         {
+/*  225 */           return false;
+/*      */         }
+/*      */       });
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private Insets getDefaultBorderInsets()
+/*      */   {
+/*  233 */     Insets localInsets = SyntheticaLookAndFeel.getInsets("Synthetica.rootPane.border.size", this.window);
+/*  234 */     if (localInsets == null) {
+/*  235 */       localInsets = SyntheticaLookAndFeel.getInsets("Synthetica.rootPane.border.insets", this.window);
+/*      */     }
+/*  236 */     return localInsets;
+/*      */   }
+/*      */   
+/*      */   public String getRootPaneBorderText()
+/*      */   {
+/*  241 */     return SyntheticaLookAndFeel.getString("Synthetica.rootPane.borderText", this.window);
+/*      */   }
+/*      */   
+/*      */   private void uninstallBorder(JRootPane paramJRootPane)
+/*      */   {
+/*  248 */     paramJRootPane.setBorder(null);
+/*      */   }
+/*      */   
+/*      */   private void installWindowListeners(JRootPane paramJRootPane, Component paramComponent)
+/*      */   {
+/*  255 */     this.window = ((paramComponent instanceof Window) ? (Window)paramComponent : SwingUtilities.getWindowAncestor(paramComponent));
+/*  256 */     this.resizeInsets = SyntheticaLookAndFeel.getInsets("Synthetica.rootPane.resizeInsets", this.window, getDefaultBorderInsets());
+/*  258 */     if (this.window != null)
+/*      */     {
+/*  261 */       if (getMouseInputListener() == null) {
+/*  262 */         setMouseInputListener(new MouseInputHandler(null));
+/*      */       }
+/*  263 */       if (getAWTMouseInputListener() == null) {
+/*  264 */         setAWTMouseInputListener(new AWTMouseInputHandler(null));
+/*      */       }
+/*  266 */       if (this.windowListener == null)
+/*      */       {
+/*  268 */         if (!SyntheticaLookAndFeel.isWindowOpacityEnabled(this.window)) {
+/*  270 */           if (OS.getCurrentOS() == OS.Mac) {
+/*  271 */             SyntheticaLookAndFeel.setWindowOpaque(this.window, false);
+/*      */           } else {
+/*      */             try
+/*      */             {
+/*  279 */               SyntheticaLookAndFeel.setWindowOpaque(this.window, false);
+/*      */             }
+/*      */             catch (Exception localException) {}
+/*      */           }
+/*      */         }
+/*  289 */         boolean bool = SyntheticaLookAndFeel.getBoolean("Synthetica.window.contentPane.opaque", this.window, true);
+/*  290 */         setContentPaneOpaque(this.window, bool);
+/*      */         
+/*  292 */         this.windowListener = new WindowAdapter()
+/*      */         {
+/*      */           public void windowOpened(WindowEvent paramAnonymousWindowEvent)
+/*      */           {
+/*  297 */             Window localWindow = paramAnonymousWindowEvent.getWindow();
+/*  298 */             if (!SyntheticaLookAndFeel.isWindowOpacityEnabled(SyntheticaRootPaneUI.this.window))
+/*      */             {
+/*  301 */               SyntheticaLookAndFeel.setWindowOpaque(localWindow, false);
+/*  303 */               if (SyntheticaLookAndFeel.getBoolean("Synthetica.window.contentPane.opaque", SyntheticaRootPaneUI.this.window, true)) {
+/*  304 */                 SyntheticaRootPaneUI.this.setContentPaneOpaque(localWindow, true);
+/*      */               }
+/*      */             }
+/*  306 */             if ((SyntheticaRootPaneUI.this.snapState == null) && (SyntheticaRootPaneUI.this.preSnapBounds == null)) {
+/*  307 */               SyntheticaRootPaneUI.this.preSnapBounds = paramAnonymousWindowEvent.getWindow().getBounds();
+/*      */             }
+/*      */           }
+/*      */           
+/*      */           public void windowDeactivated(WindowEvent paramAnonymousWindowEvent)
+/*      */           {
+/*  312 */             if ((SyntheticaRootPaneUI.this.mouseInputListener instanceof SyntheticaRootPaneUI.MouseInputHandler))
+/*      */             {
+/*  314 */               SyntheticaRootPaneUI.MouseInputHandler.access$3((SyntheticaRootPaneUI.MouseInputHandler)SyntheticaRootPaneUI.this.mouseInputListener);
+/*  315 */               SyntheticaRootPaneUI.MouseInputHandler.access$4((SyntheticaRootPaneUI.MouseInputHandler)SyntheticaRootPaneUI.this.mouseInputListener);
+/*      */             }
+/*      */           }
+/*  318 */         };
+/*  319 */         this.window.addWindowListener(this.windowListener);
+/*      */       }
+/*  322 */       if (SyntheticaLookAndFeel.isWindowShapeEnabled(this.window)) {
+/*  324 */         if ((this.windowShapeResizeListener == null) && (SyntheticaLookAndFeel.isWindowShapeSupported(this.window)))
+/*      */         {
+/*  326 */           this.windowShapeResizeListener = new ComponentAdapter()
+/*      */           {
+/*      */             public void componentResized(ComponentEvent paramAnonymousComponentEvent)
+/*      */             {
+/*  331 */               Window localWindow = (Window)paramAnonymousComponentEvent.getComponent();
+/*  332 */               SyntheticaLookAndFeel.updateWindowShape(localWindow);
+/*      */             }
+/*  334 */           };
+/*  335 */           this.window.addComponentListener(this.windowShapeResizeListener);
+/*      */         }
+/*  337 */         else if (OS.getCurrentOS() == OS.Mac)
+/*      */         {
+/*  338 */           SyntheticaLookAndFeel.updateWindowShape(this.window);
+/*      */         }
+/*      */       }
+/*  342 */       if (((this.titlePane instanceof SyntheticaTitlePane)) && (((SyntheticaTitlePane)this.titlePane).showMenuBarInTitlePane()) && (this.windowMenuBarResizeListener == null))
+/*      */       {
+/*  344 */         this.windowMenuBarResizeListener = new ComponentAdapter()
+/*      */         {
+/*      */           public void componentResized(ComponentEvent paramAnonymousComponentEvent)
+/*      */           {
+/*  349 */             SyntheticaRootPaneUI.this.rootPane.doLayout();
+/*      */           }
+/*  352 */         };
+/*  353 */         this.window.addComponentListener(this.windowMenuBarResizeListener);
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void installHeaderListener(JRootPane paramJRootPane)
+/*      */   {
+/*  360 */     if (this.rootPaneResizeListener == null)
+/*      */     {
+/*  362 */       this.rootPaneResizeListener = new ComponentAdapter()
+/*      */       {
+/*      */         public void componentResized(ComponentEvent paramAnonymousComponentEvent)
+/*      */         {
+/*  368 */           if (SyntheticaRootPaneUI.this.getHeaderShadowComponent() == null) {
+/*  369 */             SyntheticaRootPaneUI.this.updateHeaderShadow();
+/*      */           }
+/*      */         }
+/*  371 */       };
+/*  372 */       paramJRootPane.addComponentListener(this.rootPaneResizeListener);
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void uninstallHeaderListener(JRootPane paramJRootPane)
+/*      */   {
+/*  378 */     if (this.rootPaneResizeListener != null)
+/*      */     {
+/*  380 */       paramJRootPane.removeComponentListener(this.rootPaneResizeListener);
+/*  381 */       this.rootPaneResizeListener = null;
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void setContentPaneOpaque(Window paramWindow, boolean paramBoolean)
+/*      */   {
+/*  387 */     if (((paramWindow instanceof JDialog)) && ((((JDialog)paramWindow).getContentPane() instanceof JComponent))) {
+/*  388 */       ((JComponent)((JDialog)paramWindow).getContentPane()).setOpaque(paramBoolean);
+/*  389 */     } else if (((paramWindow instanceof JFrame)) && ((((JFrame)paramWindow).getContentPane() instanceof JComponent))) {
+/*  390 */       ((JComponent)((JFrame)paramWindow).getContentPane()).setOpaque(paramBoolean);
+/*  391 */     } else if (((paramWindow instanceof JWindow)) && ((((JWindow)paramWindow).getContentPane() instanceof JComponent))) {
+/*  392 */       ((JComponent)((JWindow)paramWindow).getContentPane()).setOpaque(paramBoolean);
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void uninstallWindowListeners(JRootPane paramJRootPane)
+/*      */   {
+/*  399 */     if (this.window != null)
+/*      */     {
+/*  401 */       if (this.awtMouseListener != null) {
+/*  402 */         removeAWTMouseListener(this.awtMouseListener);
+/*      */       }
+/*  409 */       this.window.removeWindowListener(this.windowListener);
+/*  410 */       this.window.removeComponentListener(this.windowShapeResizeListener);
+/*  411 */       this.window.removeComponentListener(this.windowMenuBarResizeListener);
+/*      */     }
+/*  413 */     this.awtMouseListener = null;
+/*  414 */     if ((this.mouseInputListener instanceof MouseInputHandler)) {
+/*  415 */       this.mouseInputListener = null;
+/*      */     }
+/*  416 */     this.windowListener = null;
+/*  417 */     this.windowShapeResizeListener = null;
+/*  418 */     this.windowMenuBarResizeListener = null;
+/*  419 */     this.window = null;
+/*      */   }
+/*      */   
+/*      */   private void installLayout(JRootPane paramJRootPane)
+/*      */   {
+/*  426 */     if (this.layoutManager == null) {
+/*  427 */       this.layoutManager = new SyntheticaRootLayout(null);
+/*      */     }
+/*  428 */     this.oldLayoutManager = paramJRootPane.getLayout();
+/*  429 */     paramJRootPane.setLayout(this.layoutManager);
+/*      */   }
+/*      */   
+/*      */   private void uninstallLayout(JRootPane paramJRootPane)
+/*      */   {
+/*  436 */     if (this.oldLayoutManager != null) {
+/*  437 */       paramJRootPane.setLayout(this.oldLayoutManager);
+/*      */     }
+/*  438 */     this.oldLayoutManager = null;
+/*  439 */     this.layoutManager = null;
+/*      */   }
+/*      */   
+/*      */   private void setTitlePane(JRootPane paramJRootPane, JComponent paramJComponent)
+/*      */   {
+/*  446 */     JLayeredPane localJLayeredPane = paramJRootPane.getLayeredPane();
+/*  447 */     if (this.titlePane != null)
+/*      */     {
+/*  449 */       this.titlePane.setVisible(false);
+/*  450 */       localJLayeredPane.remove(this.titlePane);
+/*      */     }
+/*  452 */     if (paramJComponent != null)
+/*      */     {
+/*  454 */       localJLayeredPane.add(paramJComponent, JLayeredPane.FRAME_CONTENT_LAYER);
+/*  455 */       paramJComponent.setVisible(true);
+/*      */     }
+/*  457 */     this.titlePane = paramJComponent;
+/*      */   }
+/*      */   
+/*      */   public void propertyChange(PropertyChangeEvent paramPropertyChangeEvent)
+/*      */   {
+/*  464 */     super.propertyChange(paramPropertyChangeEvent);
+/*  465 */     String str = paramPropertyChangeEvent.getPropertyName();
+/*  466 */     if (str == null) {
+/*  466 */       return;
+/*      */     }
+/*  468 */     if (str.equals("windowDecorationStyle"))
+/*      */     {
+/*  470 */       uninstallClientDecorations(this.rootPane);
+/*  471 */       if (isDecorated(this.rootPane)) {
+/*  472 */         installClientDecorations(this.rootPane);
+/*      */       }
+/*      */     }
+/*  474 */     else if (str.equals("ancestor"))
+/*      */     {
+/*  476 */       uninstallWindowListeners(this.rootPane);
+/*  477 */       if ((isDecorated(this.rootPane)) && (paramPropertyChangeEvent.getNewValue() != null)) {
+/*  478 */         installWindowListeners(this.rootPane, this.rootPane.getParent());
+/*      */       }
+/*      */     }
+/*  480 */     else if ((str.equals("Synthetica.style")) && ((this.titlePane instanceof SyntheticaTitlePane)))
+/*      */     {
+/*  481 */       ((SyntheticaTitlePane)this.titlePane).updateLayoutStyle();
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   public void setMaximizedBounds(Frame paramFrame)
+/*      */   {
+/*  489 */     if (SyntheticaLookAndFeel.isSystemPropertySet("synthetica.frame.fullscreen")) {
+/*  490 */       return;
+/*      */     }
+/*  491 */     paramFrame.setMaximizedBounds(getMaximizedBounds(paramFrame.getGraphicsConfiguration(), SyntheticaLookAndFeel.isSystemPropertySet("synthetica.frame.respectScreenBoundsX"), SyntheticaLookAndFeel.isSystemPropertySet("synthetica.frame.respectScreenBoundsY")));
+/*      */   }
+/*      */   
+/*      */   private Rectangle getMaximizedBounds(GraphicsConfiguration paramGraphicsConfiguration, boolean paramBoolean1, boolean paramBoolean2)
+/*      */   {
+/*  496 */     Rectangle localRectangle1 = paramGraphicsConfiguration.getBounds();
+/*  497 */     if (!paramBoolean1) {
+/*  498 */       localRectangle1.x = 0;
+/*      */     }
+/*  500 */     if (!paramBoolean2) {
+/*  501 */       localRectangle1.y = 0;
+/*      */     }
+/*  504 */     Insets localInsets = Toolkit.getDefaultToolkit().getScreenInsets(paramGraphicsConfiguration);
+/*  507 */     if (SyntheticaLookAndFeel.isSystemPropertySet("synthetica.frame.ignoreScreenInsets")) {
+/*  508 */       return localRectangle1;
+/*      */     }
+/*  511 */     if ((!SyntheticaLookAndFeel.isSystemPropertySet("synthetica.frame.disableAutoHideTaskBarCorrection")) && (localInsets.bottom == 0)) {
+/*  512 */       localInsets.bottom += 1;
+/*      */     }
+/*  514 */     Rectangle localRectangle2 = new Rectangle(localRectangle1.x + localInsets.left, 
+/*  515 */       localRectangle1.y + localInsets.top, 
+/*  516 */       localRectangle1.width - (localInsets.left + localInsets.right), 
+/*  517 */       localRectangle1.height - (localInsets.top + localInsets.bottom));
+/*      */     
+/*  519 */     return localRectangle2;
+/*      */   }
+/*      */   
+/*      */   private boolean isDecorated(JRootPane paramJRootPane)
+/*      */   {
+/*  527 */     return paramJRootPane.getWindowDecorationStyle() != 0;
+/*      */   }
+/*      */   
+/*      */   public MouseInputListener getMouseInputListener()
+/*      */   {
+/*  532 */     return this.mouseInputListener;
+/*      */   }
+/*      */   
+/*      */   public void setMouseInputListener(MouseInputListener paramMouseInputListener)
+/*      */   {
+/*  543 */     this.mouseInputListener = paramMouseInputListener;
+/*      */   }
+/*      */   
+/*      */   private AWTEventListener getAWTMouseInputListener()
+/*      */   {
+/*  553 */     return this.awtMouseListener;
+/*      */   }
+/*      */   
+/*      */   private void setAWTMouseInputListener(AWTEventListener paramAWTEventListener)
+/*      */   {
+/*  558 */     if ((this.awtMouseListener != null) && (this.window != null)) {
+/*  559 */       removeAWTMouseListener(this.awtMouseListener);
+/*      */     }
+/*  560 */     this.awtMouseListener = paramAWTEventListener;
+/*  561 */     if ((this.awtMouseListener != null) && (this.window != null)) {
+/*  562 */       addAWTMouseListener(this.awtMouseListener);
+/*      */     }
+/*  564 */     if (getMouseEventProcesor() == null) {
+/*  565 */       this.mouseEventProcessor = new MouseEventProcessor();
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void addAWTMouseListener(AWTEventListener paramAWTEventListener)
+/*      */   {
+/*  570 */     Toolkit.getDefaultToolkit().addAWTEventListener(paramAWTEventListener, 48L);
+/*      */   }
+/*      */   
+/*      */   private void removeAWTMouseListener(AWTEventListener paramAWTEventListener)
+/*      */   {
+/*  575 */     Toolkit.getDefaultToolkit().removeAWTEventListener(paramAWTEventListener);
+/*      */   }
+/*      */   
+/*      */   public MouseEventProcessor getMouseEventProcesor()
+/*      */   {
+/*  586 */     return this.mouseEventProcessor;
+/*      */   }
+/*      */   
+/*      */   public void setMouseEventProcessor(MouseEventProcessor paramMouseEventProcessor)
+/*      */   {
+/*  597 */     this.mouseEventProcessor = paramMouseEventProcessor;
+/*      */   }
+/*      */   
+/*      */   public void setHeaderShadowComponent(JComponent paramJComponent)
+/*      */   {
+/*  608 */     if (paramJComponent == null) {
+/*  609 */       uninstallHeaderShadowComponent();
+/*  610 */     } else if (paramJComponent != getHeaderShadowComponent()) {
+/*  611 */       installHeaderShadowComponent(paramJComponent);
+/*      */     }
+/*  612 */     updateHeaderShadow();
+/*      */   }
+/*      */   
+/*      */   public JComponent getHeaderShadowComponent()
+/*      */   {
+/*  623 */     return this.headerShadowComponent == null ? null : (JComponent)this.headerShadowComponent.get();
+/*      */   }
+/*      */   
+/*      */   public boolean isHeaderShadowEnabled()
+/*      */   {
+/*  634 */     return !getHeaderShadowType().equals(HeaderShadowType.NONE);
+/*      */   }
+/*      */   
+/*      */   private void installHeaderShadowComponent(JComponent paramJComponent)
+/*      */   {
+/*  639 */     Object localObject1 = (PropertyChangeListener)paramJComponent.getClientProperty("Synthetica.headerShadow.ancestorListener");
+/*  640 */     if (localObject1 == null)
+/*      */     {
+/*  642 */       localObject1 = new PropertyChangeListener()
+/*      */       {
+/*      */         public void propertyChange(PropertyChangeEvent paramAnonymousPropertyChangeEvent)
+/*      */         {
+/*  646 */           if ("ancestor".equals(paramAnonymousPropertyChangeEvent.getPropertyName()))
+/*      */           {
+/*  648 */             if (paramAnonymousPropertyChangeEvent.getNewValue() == null) {
+/*  649 */               SyntheticaRootPaneUI.this.uninstallHeaderShadowComponent();
+/*      */             }
+/*  650 */             SyntheticaRootPaneUI.this.updateHeaderShadow();
+/*      */           }
+/*      */         }
+/*  652 */       };
+/*  653 */       paramJComponent.putClientProperty("Synthetica.headerShadow.ancestorListener", localObject1);
+/*  654 */       paramJComponent.addPropertyChangeListener((PropertyChangeListener)localObject1);
+/*      */     }
+/*  657 */     Object localObject2 = (ComponentListener)paramJComponent.getClientProperty("Synthetica.headerShadow.componentListener");
+/*  658 */     if (localObject2 == null)
+/*      */     {
+/*  660 */       localObject2 = new ComponentAdapter()
+/*      */       {
+/*      */         public void componentResized(ComponentEvent paramAnonymousComponentEvent)
+/*      */         {
+/*  665 */           SyntheticaRootPaneUI.this.updateHeaderShadow();
+/*      */         }
+/*  667 */       };
+/*  668 */       paramJComponent.putClientProperty("Synthetica.headerShadow.componentListener", localObject2);
+/*  669 */       paramJComponent.addComponentListener((ComponentListener)localObject2);
+/*      */     }
+/*  672 */     JComponent localJComponent = getHeaderShadowComponent();
+/*  673 */     if ((localJComponent == null) || (paramJComponent == null) || ((paramJComponent != localJComponent) && (paramJComponent.getLocationOnScreen().y + paramJComponent.getHeight() > localJComponent.getLocationOnScreen().y + localJComponent.getHeight()))) {
+/*  674 */       this.headerShadowComponent = new WeakReference(paramJComponent);
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void uninstallHeaderShadowComponent()
+/*      */   {
+/*  679 */     this.headerShadowComponent = null;
+/*      */   }
+/*      */   
+/*      */   private void updateHeaderShadow()
+/*      */   {
+/*  685 */     if ((this.headerShadow == null) && (!"ToolBar.FloatingWindow".equals(this.rootPane.getName())))
+/*      */     {
+/*  687 */       this.headerShadow = new JComponent()
+/*      */       {
+/*      */         protected void paintComponent(Graphics paramAnonymousGraphics)
+/*      */         {
+/*  691 */           JComponent localJComponent = SyntheticaRootPaneUI.this.getProperHeaderShadowComponent();
+/*  692 */           if (localJComponent != null)
+/*      */           {
+/*  694 */             super.paintComponent(paramAnonymousGraphics);
+/*  695 */             SyntheticaRootPaneUI.this.paintHeaderShadowBackground(SyntheticaRootPaneUI.this.rootPane, paramAnonymousGraphics, 0, 0, getWidth(), getHeight());
+/*      */           }
+/*      */         }
+/*  698 */       };
+/*  699 */       this.headerShadow.setName("HeaderShadow");
+/*  700 */       this.headerShadow.setOpaque(false);
+/*      */       
+/*  702 */       this.rootPane.getLayeredPane().add(this.headerShadow, new Integer(JLayeredPane.PALETTE_LAYER.intValue() + 1));
+/*      */     }
+/*  705 */     JComponent localJComponent = getProperHeaderShadowComponent();
+/*  706 */     if ((this.headerShadow != null) && (localJComponent != null))
+/*      */     {
+/*  708 */       Point localPoint1 = localJComponent.getLocation();
+/*  709 */       Point localPoint2 = SwingUtilities.convertPoint(localJComponent.getParent(), localPoint1, this.headerShadow.getParent());
+/*  710 */       this.headerShadow.setBounds(localPoint2.x, localPoint2.y + localJComponent.getHeight(), localJComponent.getWidth(), SyntheticaLookAndFeel.getInt("Synthetica.rootPane.headerShadow.size", this.rootPane, 6));
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private JComponent getProperHeaderShadowComponent()
+/*      */   {
+/*  716 */     if (this.rootPane == null) {
+/*  717 */       return null;
+/*      */     }
+/*  718 */     HeaderShadowType localHeaderShadowType = getHeaderShadowType();
+/*  719 */     if (localHeaderShadowType == HeaderShadowType.TITLEPANE_ONLY) {
+/*  720 */       return getTitlePane();
+/*      */     }
+/*  721 */     if (isHeaderShadowComponentValid()) {
+/*  722 */       return getHeaderShadowComponent();
+/*      */     }
+/*  723 */     if ((localHeaderShadowType == HeaderShadowType.NORMAL) || (localHeaderShadowType == HeaderShadowType.SHADOW_COMPONENT_MENUBAR_ONLY))
+/*      */     {
+/*  725 */       JMenuBar localJMenuBar = this.rootPane.getJMenuBar() == null ? getTitlePane() : localHeaderShadowType == HeaderShadowType.SHADOW_COMPONENT_MENUBAR_ONLY ? null : this.rootPane.getJMenuBar();
+/*  726 */       return ((localJMenuBar instanceof SyntheticaTitlePane)) && (!((SyntheticaTitlePane)localJMenuBar).isTitlePaneEnabled()) ? null : localJMenuBar;
+/*      */     }
+/*  728 */     return null;
+/*      */   }
+/*      */   
+/*      */   private boolean isHeaderShadowComponentValid()
+/*      */   {
+/*  734 */     JComponent localJComponent = getHeaderShadowComponent();
+/*  735 */     if ((this.headerShadow != null) && (localJComponent != null) && (localJComponent.getRootPane() == this.rootPane))
+/*      */     {
+/*  737 */       Point localPoint = localJComponent.getLocation();
+/*  738 */       localPoint = SwingUtilities.convertPoint(localJComponent.getParent(), localPoint, this.headerShadow.getParent());
+/*  739 */       return localPoint.y + localJComponent.getHeight() < this.headerShadow.getParent().getHeight();
+/*      */     }
+/*  741 */     return false;
+/*      */   }
+/*      */   
+/*      */   private HeaderShadowType getHeaderShadowType()
+/*      */   {
+/*  746 */     String str = SyntheticaLookAndFeel.getString("Synthetica.rootPane.headerShadow.type", this.window);
+/*  747 */     return str == null ? HeaderShadowType.NONE : HeaderShadowType.valueOf(str);
+/*      */   }
+/*      */   
+/*      */   private void paintHeaderShadowBackground(JRootPane paramJRootPane, Graphics paramGraphics, int paramInt1, int paramInt2, int paramInt3, int paramInt4)
+/*      */   {
+/*  752 */     RootPanePainter.getInstance().paintHeaderShadowBackground(paramJRootPane, null, paramGraphics, paramInt1, paramInt2, paramInt3, paramInt4);
+/*      */   }
+/*      */   
+/*      */   private static class SyntheticaRootLayout
+/*      */     implements LayoutManager2
+/*      */   {
+/*      */     public void addLayoutComponent(String paramString, Component paramComponent) {}
+/*      */     
+/*      */     public void removeLayoutComponent(Component paramComponent) {}
+/*      */     
+/*      */     public void addLayoutComponent(Component paramComponent, Object paramObject) {}
+/*      */     
+/*      */     public float getLayoutAlignmentX(Container paramContainer)
+/*      */     {
+/*  765 */       return 0.0F;
+/*      */     }
+/*      */     
+/*      */     public float getLayoutAlignmentY(Container paramContainer)
+/*      */     {
+/*  766 */       return 0.0F;
+/*      */     }
+/*      */     
+/*      */     public void invalidateLayout(Container paramContainer) {}
+/*      */     
+/*      */     public Dimension preferredLayoutSize(Container paramContainer)
+/*      */     {
+/*  774 */       Insets localInsets = paramContainer.getInsets();
+/*  775 */       JRootPane localJRootPane = (JRootPane)paramContainer;
+/*  776 */       JComponent localJComponent = ((SyntheticaRootPaneUI)localJRootPane.getUI()).titlePane;
+/*      */       
+/*  778 */       Dimension localDimension1 = new Dimension(0, 0);
+/*  779 */       if (localJRootPane.getContentPane() != null) {
+/*  780 */         localDimension1 = localJRootPane.getContentPane().getPreferredSize();
+/*      */       } else {
+/*  782 */         localDimension1 = localJRootPane.getSize();
+/*      */       }
+/*  783 */       localDimension1 = localDimension1 == null ? new Dimension(0, 0) : localDimension1;
+/*      */       
+/*  785 */       Dimension localDimension2 = new Dimension(0, 0);
+/*  786 */       if (localJRootPane.getJMenuBar() != null) {
+/*  787 */         localDimension2 = localJRootPane.getJMenuBar().getPreferredSize();
+/*      */       }
+/*  788 */       localDimension2 = localDimension2 == null ? new Dimension(0, 0) : localDimension2;
+/*      */       
+/*  790 */       Dimension localDimension3 = localJComponent.getPreferredSize();
+/*  791 */       localDimension3 = localDimension3 == null ? new Dimension(0, 0) : localDimension3;
+/*      */       
+/*  793 */       int i = Math.max(localDimension1.width, Math.max(localDimension2.width, localDimension3.width)) + localInsets.left + localInsets.right;
+/*  794 */       int j = localDimension1.height + localDimension2.height + localDimension3.height + localInsets.top + localInsets.bottom;
+/*  795 */       return new Dimension(i, j);
+/*      */     }
+/*      */     
+/*      */     public Dimension minimumLayoutSize(Container paramContainer)
+/*      */     {
+/*  803 */       Insets localInsets = paramContainer.getInsets();
+/*  804 */       JRootPane localJRootPane = (JRootPane)paramContainer;
+/*  805 */       JComponent localJComponent = ((SyntheticaRootPaneUI)localJRootPane.getUI()).titlePane;
+/*      */       
+/*  807 */       Dimension localDimension1 = new Dimension(0, 0);
+/*  808 */       if (localJRootPane.getContentPane() != null) {
+/*  809 */         localDimension1 = localJRootPane.getContentPane().getMinimumSize();
+/*      */       } else {
+/*  811 */         localDimension1 = localJRootPane.getSize();
+/*      */       }
+/*  812 */       localDimension1 = localDimension1 == null ? new Dimension(0, 0) : localDimension1;
+/*      */       
+/*  814 */       Dimension localDimension2 = new Dimension(0, 0);
+/*  815 */       if (localJRootPane.getJMenuBar() != null) {
+/*  816 */         localDimension2 = localJRootPane.getJMenuBar().getMinimumSize();
+/*      */       }
+/*  817 */       localDimension2 = localDimension2 == null ? new Dimension(0, 0) : localDimension2;
+/*      */       
+/*  819 */       Dimension localDimension3 = localJComponent.getMinimumSize();
+/*  820 */       localDimension3 = localDimension3 == null ? new Dimension(0, 0) : localDimension3;
+/*      */       
+/*  822 */       int i = Math.max(localDimension1.width, Math.max(localDimension2.width, localDimension3.width)) + localInsets.left + localInsets.right;
+/*  823 */       int j = localDimension1.height + localDimension2.height + localDimension3.height + localInsets.top + localInsets.bottom;
+/*  824 */       return new Dimension(i, j);
+/*      */     }
+/*      */     
+/*      */     public Dimension maximumLayoutSize(Container paramContainer)
+/*      */     {
+/*  832 */       Insets localInsets = paramContainer.getInsets();
+/*  833 */       JRootPane localJRootPane = (JRootPane)paramContainer;
+/*  834 */       JComponent localJComponent = ((SyntheticaRootPaneUI)localJRootPane.getUI()).titlePane;
+/*      */       
+/*  836 */       Dimension localDimension1 = new Dimension(0, 0);
+/*  837 */       if (localJRootPane.getContentPane() != null) {
+/*  838 */         localDimension1 = localJRootPane.getContentPane().getMaximumSize();
+/*      */       } else {
+/*  840 */         localDimension1 = localJRootPane.getSize();
+/*      */       }
+/*  841 */       localDimension1 = localDimension1 == null ? new Dimension(2147483647, 2147483647) : localDimension1;
+/*      */       
+/*  843 */       Dimension localDimension2 = new Dimension(0, 0);
+/*  844 */       if (localJRootPane.getJMenuBar() != null) {
+/*  845 */         localDimension2 = localJRootPane.getJMenuBar().getMaximumSize();
+/*      */       }
+/*  846 */       localDimension2 = localDimension2 == null ? new Dimension(2147483647, 2147483647) : localDimension2;
+/*      */       
+/*  848 */       Dimension localDimension3 = localJComponent.getMaximumSize();
+/*  849 */       localDimension3 = localDimension3 == null ? new Dimension(2147483647, 2147483647) : localDimension3;
+/*      */       
+/*  851 */       int i = Math.max(localDimension1.width, Math.max(localDimension2.width, localDimension3.width));
+/*  852 */       if (i != 2147483647) {
+/*  853 */         i += localInsets.left + localInsets.right;
+/*      */       }
+/*  855 */       int j = Math.max(localDimension1.height, Math.max(localDimension2.height, localDimension3.height));
+/*  856 */       if (j != 2147483647) {
+/*  857 */         j += localInsets.top + localInsets.bottom;
+/*      */       }
+/*  858 */       return new Dimension(i, j);
+/*      */     }
+/*      */     
+/*      */     public void layoutContainer(Container paramContainer)
+/*      */     {
+/*  866 */       JRootPane localJRootPane = (JRootPane)paramContainer;
+/*  867 */       Rectangle localRectangle = localJRootPane.getBounds();
+/*  868 */       Insets localInsets1 = localJRootPane.getInsets() != null ? localJRootPane.getInsets() : new Insets(0, 0, 0, 0);
+/*  869 */       int i = localRectangle.width - localInsets1.right - localInsets1.left;
+/*  870 */       int j = localRectangle.height - localInsets1.top - localInsets1.bottom;
+/*      */       
+/*  872 */       int k = 0;
+/*  874 */       if (localJRootPane.getLayeredPane() != null) {
+/*  875 */         localJRootPane.getLayeredPane().setBounds(localInsets1.left, localInsets1.top, i, j);
+/*      */       }
+/*  876 */       if (localJRootPane.getGlassPane() != null) {
+/*  877 */         localJRootPane.getGlassPane().setBounds(localInsets1.left, localInsets1.top, i, j);
+/*      */       }
+/*  880 */       JComponent localJComponent1 = ((SyntheticaRootPaneUI)localJRootPane.getUI()).titlePane;
+/*  881 */       Dimension localDimension1 = null;
+/*  882 */       if (localJComponent1.isEnabled())
+/*      */       {
+/*  884 */         localDimension1 = localJComponent1.getPreferredSize();
+/*  885 */         if (localDimension1 != null)
+/*      */         {
+/*  887 */           localJComponent1.setBounds(0, 0, i, localDimension1.height);
+/*  888 */           k += localDimension1.height;
+/*      */         }
+/*      */       }
+/*  892 */       JMenuBar localJMenuBar = localJRootPane.getJMenuBar();
+/*  893 */       if ((localJMenuBar != null) && ((localJComponent1 instanceof SyntheticaTitlePane)))
+/*      */       {
+/*  895 */         localObject = (SyntheticaTitlePane)localJComponent1;
+/*  896 */         Dimension localDimension2 = localJMenuBar.getPreferredSize();
+/*  897 */         if (((SyntheticaTitlePane)localObject).showMenuBarInTitlePane())
+/*      */         {
+/*  899 */           boolean bool = localJMenuBar.getComponentOrientation().isLeftToRight();
+/*      */           
+/*  901 */           JComponent localJComponent2 = (JComponent)SyntheticaLookAndFeel.findComponent("RootPane.menuBar", localJComponent1);
+/*  902 */           if (localJComponent2 != null)
+/*      */           {
+/*  904 */             Insets localInsets2 = localJComponent2.getInsets();
+/*  905 */             k = localJComponent2.getY() + localInsets2.top;
+/*  906 */             int m = bool ? localJComponent2.getX() : ((SyntheticaTitlePane)localObject).clipMenuBarWidth() ? localJComponent2.getX() : 0;
+/*  907 */             int n = bool ? i - localJComponent2.getX() : ((SyntheticaTitlePane)localObject).clipMenuBarWidth() ? localJComponent2.getWidth() - localInsets2.left - localInsets2.right : localJComponent2.getX() + localJComponent2.getWidth();
+/*  908 */             localJMenuBar.setBounds(m + localInsets2.left, k, n, localDimension2.height);
+/*  909 */             k += localInsets2.top + localInsets2.bottom + localDimension2.height;
+/*      */             
+/*  911 */             JComponent localJComponent3 = ((SyntheticaTitlePane)localObject).getUserComponent();
+/*  912 */             if ((localJComponent3 != null) && (((SyntheticaTitlePane)localObject).getLayoutStyle() == SyntheticaTitlePane.LayoutStyle.SECONDARYMENU)) {
+/*  913 */               k += localJComponent3.getPreferredSize().height;
+/*      */             }
+/*  914 */             k = Math.max(k, localDimension1 == null ? 0 : localDimension1.height);
+/*      */           }
+/*      */         }
+/*      */         else
+/*      */         {
+/*  919 */           localJMenuBar.setBounds(0, k, i, localDimension2.height);
+/*  920 */           k += localDimension2.height;
+/*      */         }
+/*      */       }
+/*  924 */       Object localObject = localJRootPane.getContentPane();
+/*  925 */       if (localObject != null) {
+/*  928 */         ((Container)localObject).setBounds(0, k, i, j < k ? 0 : j - k);
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   void snapNext(Window paramWindow)
+/*      */   {
+/*  935 */     if ((this.snapState == null) && (!isMaximized(paramWindow)))
+/*      */     {
+/*  936 */       this.preSnapBounds = paramWindow.getBounds();
+/*      */     }
+/*  937 */     else if (isMaximized(paramWindow))
+/*      */     {
+/*  939 */       ((SyntheticaTitlePane)this.titlePane).restore();
+/*  940 */       this.snapState = null;
+/*      */     }
+/*  943 */     GraphicsConfiguration localGraphicsConfiguration1 = paramWindow.getGraphicsConfiguration();
+/*  944 */     GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+/*  945 */     for (GraphicsDevice localGraphicsDevice : localGraphicsEnvironment.getScreenDevices())
+/*      */     {
+/*  947 */       GraphicsConfiguration localGraphicsConfiguration2 = localGraphicsDevice.getDefaultConfiguration();
+/*  948 */       if ((localGraphicsConfiguration1 == localGraphicsConfiguration2) && (this.snapState == SnapState.SNAP_LEFT))
+/*      */       {
+/*  950 */         restoreSnappedWindow(paramWindow, localGraphicsConfiguration2, true);
+/*  951 */         break;
+/*      */       }
+/*  953 */       if (this.snapState == SnapState.SNAP_RIGHT)
+/*      */       {
+/*  955 */         Rectangle localRectangle = getMultiScreenBounds();
+/*      */         
+/*  957 */         int k = localGraphicsConfiguration1.getBounds().x + localGraphicsConfiguration1.getBounds().width == localRectangle.x + localRectangle.width ? 1 : 0;
+/*  958 */         int m = localGraphicsConfiguration2.getBounds().x == localRectangle.x ? 1 : 0;
+/*  959 */         if (((k != 0) && (m != 0)) || (localGraphicsConfiguration2.getBounds().x > localGraphicsConfiguration1.getBounds().x + localGraphicsConfiguration1.getBounds().width - 1))
+/*      */         {
+/*  961 */           snapLeft(localGraphicsConfiguration2, paramWindow);
+/*  962 */           break;
+/*      */         }
+/*      */       }
+/*  965 */       else if (localGraphicsConfiguration1 == localGraphicsConfiguration2)
+/*      */       {
+/*  967 */         snapRight(localGraphicsConfiguration2, paramWindow);
+/*  968 */         break;
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   void snapPrev(Window paramWindow)
+/*      */   {
+/*  975 */     if ((this.snapState == null) && (!isMaximized(paramWindow)))
+/*      */     {
+/*  976 */       this.preSnapBounds = paramWindow.getBounds();
+/*      */     }
+/*  977 */     else if (isMaximized(paramWindow))
+/*      */     {
+/*  979 */       ((SyntheticaTitlePane)this.titlePane).restore();
+/*  980 */       this.snapState = null;
+/*      */     }
+/*  983 */     GraphicsConfiguration localGraphicsConfiguration1 = paramWindow.getGraphicsConfiguration();
+/*  984 */     GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+/*  985 */     for (GraphicsDevice localGraphicsDevice : localGraphicsEnvironment.getScreenDevices())
+/*      */     {
+/*  987 */       GraphicsConfiguration localGraphicsConfiguration2 = localGraphicsDevice.getDefaultConfiguration();
+/*  988 */       if ((localGraphicsConfiguration1 == localGraphicsConfiguration2) && (this.snapState == SnapState.SNAP_RIGHT))
+/*      */       {
+/*  990 */         restoreSnappedWindow(paramWindow, localGraphicsConfiguration2, true);
+/*  991 */         break;
+/*      */       }
+/*  993 */       if (this.snapState == SnapState.SNAP_LEFT)
+/*      */       {
+/*  995 */         Rectangle localRectangle = getMultiScreenBounds();
+/*      */         
+/*  997 */         int k = localGraphicsConfiguration1.getBounds().x == localRectangle.x ? 1 : 0;
+/*  998 */         int m = localGraphicsConfiguration2.getBounds().x + localGraphicsConfiguration2.getBounds().width == localRectangle.x + localRectangle.width ? 1 : 0;
+/*  999 */         if (((k != 0) && (m != 0)) || (localGraphicsConfiguration2.getBounds().x + localGraphicsConfiguration2.getBounds().width - 1 < localGraphicsConfiguration1.getBounds().x))
+/*      */         {
+/* 1001 */           snapRight(localGraphicsConfiguration2, paramWindow);
+/* 1002 */           break;
+/*      */         }
+/*      */       }
+/* 1005 */       else if (localGraphicsConfiguration1 == localGraphicsConfiguration2)
+/*      */       {
+/* 1007 */         snapLeft(localGraphicsConfiguration2, paramWindow);
+/* 1008 */         break;
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private void snapLeft(GraphicsConfiguration paramGraphicsConfiguration, Window paramWindow)
+/*      */   {
+/* 1015 */     this.snapState = SnapState.SNAP_LEFT;
+/* 1016 */     Rectangle localRectangle = getMaximizedBounds(paramGraphicsConfiguration, true, true);
+/* 1017 */     localRectangle.width /= 2;
+/* 1018 */     paramWindow.setBounds(justifySnapBounds(localRectangle, this.snapState));
+/*      */   }
+/*      */   
+/*      */   private void snapRight(GraphicsConfiguration paramGraphicsConfiguration, Window paramWindow)
+/*      */   {
+/* 1023 */     this.snapState = SnapState.SNAP_RIGHT;
+/* 1024 */     Rectangle localRectangle = getMaximizedBounds(paramGraphicsConfiguration, true, true);
+/* 1025 */     localRectangle.width /= 2;
+/* 1026 */     localRectangle.x += localRectangle.width;
+/* 1027 */     paramWindow.setBounds(justifySnapBounds(localRectangle, this.snapState));
+/*      */   }
+/*      */   
+/*      */   void restoreSnappedWindow(Window paramWindow, GraphicsConfiguration paramGraphicsConfiguration, boolean paramBoolean)
+/*      */   {
+/* 1032 */     if (this.preSnapBounds != null)
+/*      */     {
+/* 1034 */       if (paramBoolean)
+/*      */       {
+/* 1037 */         Rectangle localRectangle1 = getMaximizedBounds(paramGraphicsConfiguration, true, true);
+/* 1038 */         if (localRectangle1.intersects(this.preSnapBounds))
+/*      */         {
+/* 1039 */           paramWindow.setLocation(this.preSnapBounds.x, this.preSnapBounds.y);
+/*      */         }
+/*      */         else
+/*      */         {
+/* 1042 */           Rectangle localRectangle2 = toRelativeScreenBounds(this.preSnapBounds);
+/*      */           
+/* 1044 */           paramWindow.setLocation(Math.max(localRectangle1.x, Math.min(localRectangle1.x + localRectangle1.width - localRectangle2.width, localRectangle1.x + localRectangle2.x)), Math.max(localRectangle1.y, Math.min(localRectangle1.y + localRectangle1.height - localRectangle2.height, localRectangle1.y + localRectangle2.y)));
+/*      */         }
+/*      */       }
+/* 1047 */       paramWindow.setSize(this.preSnapBounds.width, this.preSnapBounds.height);
+/*      */     }
+/* 1049 */     this.snapState = null;
+/*      */   }
+/*      */   
+/*      */   private Rectangle toRelativeScreenBounds(Rectangle paramRectangle)
+/*      */   {
+/* 1054 */     GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+/* 1055 */     for (GraphicsDevice localGraphicsDevice : localGraphicsEnvironment.getScreenDevices())
+/*      */     {
+/* 1057 */       GraphicsConfiguration localGraphicsConfiguration = localGraphicsDevice.getDefaultConfiguration();
+/* 1058 */       Rectangle localRectangle1 = localGraphicsConfiguration.getBounds();
+/* 1059 */       Rectangle localRectangle2 = new Rectangle(paramRectangle.x - localRectangle1.x, paramRectangle.y - localRectangle1.y, paramRectangle.width, paramRectangle.height);
+/* 1060 */       if (localRectangle1.intersects(paramRectangle)) {
+/* 1061 */         return localRectangle2;
+/*      */       }
+/*      */     }
+/* 1063 */     return null;
+/*      */   }
+/*      */   
+/*      */   private Rectangle getMultiScreenBounds()
+/*      */   {
+/* 1068 */     Rectangle localRectangle = new Rectangle();
+/* 1069 */     GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+/* 1070 */     for (GraphicsDevice localGraphicsDevice : localGraphicsEnvironment.getScreenDevices()) {
+/* 1071 */       localRectangle = localRectangle.union(localGraphicsDevice.getDefaultConfiguration().getBounds());
+/*      */     }
+/* 1072 */     return localRectangle;
+/*      */   }
+/*      */   
+/*      */   private Rectangle justifySnapBounds(Rectangle paramRectangle, SnapState paramSnapState)
+/*      */   {
+/* 1078 */     Insets localInsets = SyntheticaLookAndFeel.getInsets("Synthetica.rootPane.snap.insets", this.window, false);
+/* 1079 */     Rectangle localRectangle = new Rectangle(paramRectangle);
+/* 1080 */     switch (paramSnapState)
+/*      */     {
+/*      */     case SNAP_BOTTOM_LEFT: 
+/* 1083 */       localRectangle.x -= localInsets.left;
+/* 1084 */       localRectangle.y -= localInsets.top;
+/* 1085 */       localRectangle.width += localInsets.left;
+/* 1086 */       localRectangle.height += localInsets.top + localInsets.bottom;
+/* 1087 */       break;
+/*      */     case SNAP_BOTTOM_RIGHT: 
+/* 1089 */       localRectangle.y -= localInsets.top;
+/* 1090 */       localRectangle.width += localInsets.right;
+/* 1091 */       localRectangle.height += localInsets.top + localInsets.bottom;
+/* 1092 */       break;
+/*      */     case SNAP_HEIGHT: 
+/* 1094 */       localRectangle.y -= localInsets.top;
+/* 1095 */       localRectangle.height += localInsets.top + localInsets.bottom;
+/*      */     }
+/* 1099 */     return localRectangle;
+/*      */   }
+/*      */   
+/*      */   boolean isSnapEnabled(Window paramWindow)
+/*      */   {
+/* 1104 */     int i = 1;
+/* 1105 */     if (JavaVersion.JAVA7_OR_ABOVE)
+/*      */     {
+/* 1110 */       GraphicsConfiguration localGraphicsConfiguration = paramWindow.getGraphicsConfiguration();
+/*      */       try
+/*      */       {
+/* 1113 */         Method localMethod = GraphicsConfiguration.class.getMethod("isTranslucencyCapable", new Class[0]);
+/* 1114 */         Object localObject = localMethod.invoke(localGraphicsConfiguration, null);
+/* 1115 */         i = (localObject instanceof Boolean) ? ((Boolean)localObject).booleanValue() : 0;
+/*      */       }
+/*      */       catch (Exception localException)
+/*      */       {
+/* 1119 */         localException.printStackTrace();
+/*      */       }
+/*      */     }
+/* 1122 */     return (i != 0) && ((paramWindow instanceof Frame)) && (((Frame)paramWindow).isResizable()) && (SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.snap.enabled", this.window, true));
+/*      */   }
+/*      */   
+/*      */   private boolean isMaximized(Window paramWindow)
+/*      */   {
+/* 1127 */     return ((paramWindow instanceof Frame)) && ((((Frame)paramWindow).getExtendedState() & 0x6) == 6);
+/*      */   }
+/*      */   
+/*      */   private class AWTMouseInputHandler
+/*      */     implements AWTEventListener
+/*      */   {
+/*      */     private AWTMouseInputHandler() {}
+/*      */     
+/*      */     public void eventDispatched(AWTEvent paramAWTEvent)
+/*      */     {
+/* 1141 */       Object localObject = paramAWTEvent.getSource();
+/* 1142 */       if ((localObject instanceof Component))
+/*      */       {
+/* 1144 */         Component localComponent = (Component)localObject;
+/* 1145 */         Window localWindow = (localComponent instanceof Window) ? (Window)localComponent : SwingUtilities.getWindowAncestor(localComponent);
+/* 1146 */         if ((SyntheticaRootPaneUI.this.window != localWindow) || (!(paramAWTEvent instanceof MouseEvent)) || (SyntheticaRootPaneUI.this.rootPane == null)) {
+/* 1147 */           return;
+/*      */         }
+/* 1148 */         SyntheticaRootPaneUI.this.mouseEventProcessor.process(SyntheticaRootPaneUI.this.rootPane, (MouseEvent)paramAWTEvent);
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   private class MouseInputHandler
+/*      */     implements MouseInputListener
+/*      */   {
+/*      */     private static final int WINDOW_MOVE = 1;
+/*      */     private static final int WINDOW_RESIZE = 2;
+/*      */     private int windowAction;
+/*      */     private int dragXOffset;
+/*      */     private int dragYOffset;
+/*      */     private Dimension dragDimension;
+/*      */     private int resizeType;
+/*      */     private int minimumYPos;
+/*      */     private int maximumYPos;
+/*      */     private boolean liveResize;
+/*      */     private boolean liveDrag;
+/*      */     private Rectangle resizeBounds;
+/*      */     private JWindow dragResizeWindow;
+/*      */     private JWindow snapWindow;
+/*      */     private SyntheticaRootPaneUI.SnapState tmpSnapState;
+/*      */     private int preSnapXOffset;
+/*      */     private Point dragStart;
+/*      */     private Point dragStartOnScreen;
+/*      */     private final PrivilegedExceptionAction<?> locationAction;
+/*      */     private Frame frame;
+/*      */     private Dialog dialog;
+/*      */     
+/*      */     private MouseInputHandler()
+/*      */     {
+/* 1171 */       this.liveResize = SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.liveResizeEnabled", SyntheticaRootPaneUI.this.window, true);
+/* 1172 */       this.liveDrag = SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.liveDragEnabled", SyntheticaRootPaneUI.this.window, true);
+/*      */       
+/*      */ 
+/*      */ 
+/*      */ 
+/*      */ 
+/*      */ 
+/*      */ 
+/*      */ 
+/* 1181 */       this.locationAction = new PrivilegedExceptionAction()
+/*      */       {
+/*      */         public Object run()
+/*      */           throws HeadlessException
+/*      */         {
+/* 1185 */           PointerInfo localPointerInfo = MouseInfo.getPointerInfo();
+/* 1186 */           return localPointerInfo == null ? null : localPointerInfo.getLocation();
+/*      */         }
+/* 1189 */       };
+/* 1190 */       this.frame = null;
+/* 1191 */       this.dialog = null;
+/* 1193 */       if ((SyntheticaRootPaneUI.this.window instanceof Frame)) {
+/* 1194 */         this.frame = ((Frame)SyntheticaRootPaneUI.this.window);
+/* 1195 */       } else if ((SyntheticaRootPaneUI.this.window instanceof Dialog)) {
+/* 1196 */         this.dialog = ((Dialog)SyntheticaRootPaneUI.this.window);
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     private Point getPoint(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1202 */       return SwingUtilities.convertPoint(paramMouseEvent.getComponent(), paramMouseEvent.getPoint(), SyntheticaRootPaneUI.this.window);
+/*      */     }
+/*      */     
+/*      */     public void mousePressed(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1209 */       if (!SyntheticaRootPaneUI.this.isDecorated(SyntheticaRootPaneUI.this.rootPane)) {
+/* 1210 */         return;
+/*      */       }
+/* 1211 */       SyntheticaRootPaneUI.this.window.toFront();
+/*      */       
+/* 1213 */       Rectangle localRectangle = SyntheticaRootPaneUI.this.window.getGraphicsConfiguration().getBounds();
+/* 1214 */       this.minimumYPos = localRectangle.y;
+/* 1215 */       this.maximumYPos = (localRectangle.y + localRectangle.height);
+/*      */       
+/* 1217 */       this.dragStart = getPoint(paramMouseEvent);
+/* 1218 */       this.dragStartOnScreen = new Point(this.dragStart);
+/* 1219 */       SwingUtilities.convertPointToScreen(this.dragStartOnScreen, SyntheticaRootPaneUI.this.window);
+/* 1220 */       Point localPoint = SwingUtilities.convertPoint(SyntheticaRootPaneUI.this.window, this.dragStart, SyntheticaRootPaneUI.this.titlePane);
+/* 1221 */       int i = position2Cursor(SyntheticaRootPaneUI.this.window, this.dragStart.x, this.dragStart.y);
+/* 1224 */       if ((i == 0) && (SyntheticaRootPaneUI.this.titlePane != null) && 
+/* 1225 */         (SyntheticaRootPaneUI.this.titlePane.contains(localPoint)) && (
+/* 1226 */         (this.dialog != null) || ((this.frame != null) && (this.frame.getExtendedState() != 6))))
+/*      */       {
+/* 1228 */         this.windowAction = 1;
+/* 1229 */         this.dragXOffset = this.dragStart.x;
+/* 1230 */         this.dragYOffset = this.dragStart.y;
+/* 1231 */         if ((!this.liveDrag) && (this.dragResizeWindow == null))
+/*      */         {
+/* 1233 */           this.dragResizeWindow = createDragResizeWindow();
+/* 1234 */           this.dragResizeWindow.setBounds(SyntheticaRootPaneUI.this.window.getBounds());
+/* 1235 */           this.dragResizeWindow.setVisible(true);
+/*      */         }
+/*      */       }
+/* 1239 */       else if (isWindowResizable())
+/*      */       {
+/* 1241 */         this.dragXOffset = this.dragStart.x;
+/* 1242 */         this.dragYOffset = this.dragStart.y;
+/* 1243 */         this.dragDimension = new Dimension(SyntheticaRootPaneUI.this.window.getWidth(), SyntheticaRootPaneUI.this.window.getHeight());
+/* 1244 */         this.resizeType = position2Cursor(SyntheticaRootPaneUI.this.window, this.dragStart.x, this.dragStart.y);
+/* 1245 */         if (this.resizeType != 0) {
+/* 1246 */           this.windowAction = 2;
+/*      */         }
+/* 1247 */         if ((!this.liveResize) && (this.resizeType != 0) && (this.dragResizeWindow == null))
+/*      */         {
+/* 1249 */           this.dragResizeWindow = createDragResizeWindow();
+/* 1250 */           this.dragResizeWindow.setCursor(Cursor.getPredefinedCursor(i));
+/* 1251 */           this.dragResizeWindow.setBounds(SyntheticaRootPaneUI.this.window.getBounds());
+/* 1252 */           this.dragResizeWindow.setVisible(true);
+/*      */         }
+/*      */       }
+/* 1256 */       if ((SyntheticaRootPaneUI.this.isSnapEnabled(SyntheticaRootPaneUI.this.window)) && (SyntheticaRootPaneUI.this.snapState == null))
+/*      */       {
+/* 1258 */         SyntheticaRootPaneUI.this.preSnapBounds = SyntheticaRootPaneUI.this.window.getBounds();
+/* 1259 */         this.preSnapXOffset = this.dragXOffset;
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     public void mouseReleased(MouseEvent paramMouseEvent)
+/*      */     {
+/*      */       Rectangle localRectangle;
+/* 1268 */       if ((this.dragResizeWindow != null) && (((this.windowAction == 2) && (!this.liveResize)) || ((this.windowAction == 1) && (!this.liveDrag))))
+/*      */       {
+/* 1270 */         localRectangle = this.dragResizeWindow.getBounds();
+/* 1271 */         this.dragResizeWindow.setVisible(false);
+/* 1272 */         this.dragResizeWindow.dispose();
+/* 1273 */         if ((this.windowAction == 2) && (this.resizeBounds != null)) {
+/* 1274 */           SyntheticaRootPaneUI.this.window.setBounds(this.resizeBounds);
+/*      */         } else {
+/* 1276 */           SyntheticaRootPaneUI.this.window.setBounds(localRectangle);
+/*      */         }
+/* 1277 */         this.dragResizeWindow = null;
+/* 1278 */         this.resizeBounds = null;
+/*      */       }
+/* 1281 */       if (this.snapWindow != null)
+/*      */       {
+/* 1283 */         localRectangle = this.snapWindow.getBounds();
+/* 1284 */         if (this.tmpSnapState == SyntheticaRootPaneUI.SnapState.SNAP_MAXIMIZED) {
+/* 1285 */           ((SyntheticaTitlePane)SyntheticaRootPaneUI.this.titlePane).maximize();
+/*      */         } else {
+/* 1287 */           SyntheticaRootPaneUI.this.window.setBounds(SyntheticaRootPaneUI.this.justifySnapBounds(localRectangle, this.tmpSnapState));
+/*      */         }
+/* 1288 */         disposeSnapWindow();
+/* 1289 */         SyntheticaRootPaneUI.this.snapState = this.tmpSnapState;
+/* 1290 */         this.tmpSnapState = null;
+/*      */       }
+/* 1294 */       if ((this.windowAction == 2) && (!SyntheticaRootPaneUI.this.window.isValid()))
+/*      */       {
+/* 1296 */         SyntheticaRootPaneUI.this.window.validate();
+/* 1297 */         SyntheticaRootPaneUI.this.rootPane.repaint();
+/*      */       }
+/* 1299 */       this.windowAction = -1;
+/* 1300 */       this.resizeType = -1;
+/* 1301 */       SyntheticaRootPaneUI.this.window.setCursor(Cursor.getDefaultCursor());
+/*      */     }
+/*      */     
+/*      */     private void cancelDragResize()
+/*      */     {
+/* 1306 */       if ((this.dragResizeWindow != null) && (((this.windowAction == 2) && (!this.liveResize)) || ((this.windowAction == 1) && (!this.liveDrag))))
+/*      */       {
+/* 1308 */         this.dragResizeWindow.setVisible(false);
+/* 1309 */         this.dragResizeWindow.dispose();
+/* 1310 */         this.dragResizeWindow = null;
+/* 1311 */         this.resizeBounds = null;
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     public void mouseMoved(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1319 */       if (!SyntheticaRootPaneUI.this.isDecorated(SyntheticaRootPaneUI.this.rootPane)) {
+/* 1320 */         return;
+/*      */       }
+/* 1322 */       Point localPoint = getPoint(paramMouseEvent);
+/* 1323 */       int i = position2Cursor(SyntheticaRootPaneUI.this.window, localPoint.x, localPoint.y);
+/* 1324 */       if ((i != 0) && (isWindowResizable())) {
+/* 1325 */         SyntheticaRootPaneUI.this.window.setCursor(Cursor.getPredefinedCursor(i));
+/*      */       } else {
+/* 1329 */         SyntheticaRootPaneUI.this.window.setCursor(Cursor.getDefaultCursor());
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     public void mouseEntered(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1338 */       mouseMoved(paramMouseEvent);
+/*      */     }
+/*      */     
+/*      */     public void mouseExited(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1347 */       SyntheticaRootPaneUI.this.window.setCursor(Cursor.getDefaultCursor());
+/*      */     }
+/*      */     
+/*      */     private void cancelSnap()
+/*      */     {
+/* 1352 */       if ((this.windowAction == 1) || (this.windowAction == 2)) {
+/* 1353 */         resetSnapState();
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     private void resetSnapState()
+/*      */     {
+/* 1358 */       if (this.snapWindow != null) {
+/* 1359 */         disposeSnapWindow();
+/*      */       }
+/* 1360 */       this.tmpSnapState = null;
+/* 1361 */       SyntheticaRootPaneUI.this.snapState = null;
+/*      */     }
+/*      */     
+/*      */     private void disposeSnapWindow()
+/*      */     {
+/* 1368 */       this.snapWindow.setVisible(false);
+/* 1369 */       this.snapWindow.dispose();
+/* 1370 */       this.snapWindow = null;
+/*      */     }
+/*      */     
+/*      */     private void unsnap(Window paramWindow)
+/*      */     {
+/* 1375 */       SyntheticaRootPaneUI.this.restoreSnappedWindow(paramWindow, paramWindow.getGraphicsConfiguration(), false);
+/* 1376 */       this.dragXOffset = this.preSnapXOffset;
+/*      */     }
+/*      */     
+/*      */     public void mouseDragged(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1383 */       GraphicsConfiguration localGraphicsConfiguration = (!this.liveDrag) && (this.dragResizeWindow != null) ? this.dragResizeWindow.getGraphicsConfiguration() : SyntheticaRootPaneUI.this.window.getGraphicsConfiguration();
+/* 1384 */       Insets localInsets = Toolkit.getDefaultToolkit().getScreenInsets(localGraphicsConfiguration);
+/* 1385 */       this.minimumYPos = (localGraphicsConfiguration.getBounds().y + localInsets.top);
+/* 1386 */       this.maximumYPos = (localGraphicsConfiguration.getBounds().y + localGraphicsConfiguration.getBounds().height - localInsets.bottom - SyntheticaRootPaneUI.this.titlePane.getHeight() - SyntheticaRootPaneUI.this.rootPane.getInsets().top);
+/*      */       
+/* 1388 */       Rectangle localRectangle1 = SyntheticaRootPaneUI.this.getMultiScreenBounds();
+/* 1389 */       int i = localRectangle1.x + localInsets.left;
+/* 1390 */       int j = localRectangle1.x + localRectangle1.width - localInsets.left - localInsets.right;
+/*      */       
+/* 1392 */       boolean bool1 = SyntheticaLookAndFeel.isSystemPropertySet("synthetica.window.respectMinimumYPos");
+/* 1393 */       boolean bool2 = SyntheticaLookAndFeel.isSystemPropertySet("synthetica.window.respectMaximumYPos");
+/*      */       boolean bool3;
+/* 1396 */       if ((SyntheticaRootPaneUI.this.isMaximized(SyntheticaRootPaneUI.this.window)) && ((paramMouseEvent.getComponent() instanceof Window)) && (SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.restoreByDragFromMaximized.enabled", SyntheticaRootPaneUI.this.window, true)))
+/*      */       {
+/* 1398 */         int k = SyntheticaLookAndFeel.getInt("Synthetica.rootPane.restoreByDragFromMaximized.threshold", SyntheticaRootPaneUI.this.window, 4);
+/* 1399 */         bool3 = (Math.abs(this.dragStart.x - paramMouseEvent.getX()) > k) || (Math.abs(this.dragStart.y - paramMouseEvent.getY()) > k);
+/* 1400 */         if (bool3)
+/*      */         {
+/* 1402 */           ((SyntheticaTitlePane)SyntheticaRootPaneUI.this.titlePane).restore();
+/* 1403 */           this.windowAction = 1;
+/* 1406 */           if (this.dragXOffset <= 0) {
+/* 1407 */             this.dragXOffset = (SyntheticaRootPaneUI.this.window.getWidth() / 2);
+/*      */           }
+/* 1408 */           if (this.dragYOffset <= 0) {
+/* 1409 */             this.dragYOffset = (SyntheticaRootPaneUI.this.titlePane.getHeight() / 2);
+/*      */           }
+/* 1411 */           if (!this.liveDrag)
+/*      */           {
+/* 1413 */             this.dragResizeWindow = createDragResizeWindow();
+/* 1414 */             this.dragResizeWindow.setBounds(SyntheticaRootPaneUI.this.window.getBounds());
+/* 1415 */             this.dragResizeWindow.setVisible(true);
+/*      */           }
+/*      */         }
+/*      */       }
+/*      */       Object localObject;
+/* 1420 */       if (this.windowAction == 1)
+/*      */       {
+/*      */         try
+/*      */         {
+/* 1428 */           Point localPoint1 = (Point)AccessController.doPrivileged(this.locationAction);
+/* 1430 */           if (localPoint1 == null)
+/*      */           {
+/* 1432 */             localPoint1 = getPoint(paramMouseEvent);
+/* 1433 */             SwingUtilities.convertPointToScreen(localPoint1, (Component)paramMouseEvent.getSource());
+/*      */           }
+/* 1436 */           localPoint1.x -= this.dragXOffset;
+/* 1437 */           localPoint1.y -= this.dragYOffset;
+/* 1440 */           if ((bool1) && (localPoint1.y < this.minimumYPos)) {
+/* 1441 */             localPoint1.y = this.minimumYPos;
+/*      */           }
+/* 1442 */           if ((bool2) && (localPoint1.y > this.maximumYPos)) {
+/* 1443 */             localPoint1.y = this.maximumYPos;
+/*      */           }
+/* 1445 */           bool3 = SyntheticaRootPaneUI.this.isSnapEnabled(SyntheticaRootPaneUI.this.window);
+/* 1447 */           if ((bool3) && (SyntheticaRootPaneUI.this.snapState == SyntheticaRootPaneUI.SnapState.SNAP_HEIGHT) && (localPoint1.y < this.minimumYPos + SyntheticaRootPaneUI.this.snapHeightThreshold)) {
+/* 1448 */             localPoint1.y = (this.minimumYPos - SyntheticaLookAndFeel.getInsets("Synthetica.rootPane.snap.insets", SyntheticaRootPaneUI.this.window, false).top);
+/*      */           }
+/* 1450 */           if (this.liveDrag) {
+/* 1451 */             SyntheticaRootPaneUI.this.window.setLocation(localPoint1);
+/*      */           } else {
+/* 1453 */             this.dragResizeWindow.setLocation(localPoint1);
+/*      */           }
+/* 1455 */           if (!bool3) {
+/*      */             return;
+/*      */           }
+/* 1457 */           localObject = this.liveDrag ? SyntheticaRootPaneUI.this.window.getGraphicsConfiguration() : this.dragResizeWindow.getGraphicsConfiguration();
+/* 1458 */           Point localPoint3 = new Point(localPoint1.x + this.dragXOffset, localPoint1.y + this.dragYOffset);
+/* 1460 */           if (localPoint3.y <= this.minimumYPos)
+/*      */           {
+/* 1462 */             this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_MAXIMIZED;
+/* 1463 */             if (this.snapWindow == null) {
+/* 1464 */               this.snapWindow = createSnapWindow();
+/*      */             }
+/* 1465 */             this.snapWindow.setBounds(SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true));
+/* 1466 */             this.snapWindow.setVisible(true);
+/*      */           }
+/*      */           else
+/*      */           {
+/*      */             Rectangle localRectangle2;
+/* 1469 */             if (localPoint3.x <= i)
+/*      */             {
+/* 1471 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_LEFT;
+/* 1472 */               if (this.snapWindow == null) {
+/* 1473 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1474 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/* 1475 */               localRectangle2.width /= 2;
+/* 1476 */               this.snapWindow.setBounds(localRectangle2);
+/* 1477 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1480 */             else if (localPoint3.x >= j - 1)
+/*      */             {
+/* 1482 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_RIGHT;
+/* 1483 */               if (this.snapWindow == null) {
+/* 1484 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1485 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/* 1486 */               localRectangle2.width /= 2;
+/* 1487 */               localRectangle2.x += localRectangle2.width;
+/* 1488 */               this.snapWindow.setBounds(localRectangle2);
+/* 1489 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1492 */             else if ((localPoint3.y <= this.minimumYPos + SyntheticaRootPaneUI.this.snapCornerSize) && (localPoint3.x <= i + SyntheticaRootPaneUI.this.snapCornerSize))
+/*      */             {
+/* 1494 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_TOP_LEFT;
+/* 1495 */               if (this.snapWindow == null) {
+/* 1496 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1497 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/* 1498 */               localRectangle2.width /= 2;
+/* 1499 */               localRectangle2.height /= 2;
+/* 1500 */               this.snapWindow.setBounds(localRectangle2);
+/* 1501 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1504 */             else if ((localPoint3.y <= this.minimumYPos + SyntheticaRootPaneUI.this.snapCornerSize) && (localPoint3.x >= j - 1 - SyntheticaRootPaneUI.this.snapCornerSize))
+/*      */             {
+/* 1506 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_TOP_RIGHT;
+/* 1507 */               if (this.snapWindow == null) {
+/* 1508 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1509 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/* 1510 */               localRectangle2.width /= 2;
+/* 1511 */               localRectangle2.height /= 2;
+/* 1512 */               localRectangle2.x += localRectangle2.width;
+/* 1513 */               this.snapWindow.setBounds(localRectangle2);
+/* 1514 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1517 */             else if ((localPoint3.y >= this.maximumYPos - 1 - SyntheticaRootPaneUI.this.snapCornerSize) && (localPoint3.x <= i + SyntheticaRootPaneUI.this.snapCornerSize))
+/*      */             {
+/* 1519 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_BOTTOM_LEFT;
+/* 1520 */               if (this.snapWindow == null) {
+/* 1521 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1522 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/*      */               
+/* 1524 */               localRectangle2.height += 1;
+/* 1525 */               localRectangle2.width /= 2;
+/* 1526 */               localRectangle2.height /= 2;
+/* 1527 */               localRectangle2.y += localRectangle2.height - 1;
+/* 1528 */               this.snapWindow.setBounds(localRectangle2);
+/* 1529 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1532 */             else if ((localPoint3.y >= this.maximumYPos - 1 - SyntheticaRootPaneUI.this.snapCornerSize) && (localPoint3.x >= j - 1 - SyntheticaRootPaneUI.this.snapCornerSize))
+/*      */             {
+/* 1534 */               this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_BOTTOM_RIGHT;
+/* 1535 */               if (this.snapWindow == null) {
+/* 1536 */                 this.snapWindow = createSnapWindow();
+/*      */               }
+/* 1537 */               localRectangle2 = SyntheticaRootPaneUI.this.getMaximizedBounds((GraphicsConfiguration)localObject, true, true);
+/*      */               
+/* 1539 */               localRectangle2.height += 1;
+/* 1540 */               localRectangle2.width /= 2;
+/* 1541 */               localRectangle2.height /= 2;
+/* 1542 */               localRectangle2.x += localRectangle2.width;
+/* 1543 */               localRectangle2.y += localRectangle2.height - 1;
+/* 1544 */               this.snapWindow.setBounds(localRectangle2);
+/* 1545 */               this.snapWindow.setVisible(true);
+/*      */             }
+/* 1549 */             else if ((this.snapWindow != null) && (localPoint3.y > this.minimumYPos + SyntheticaRootPaneUI.this.snapThreshold) && 
+/* 1550 */               (localPoint3.x > i + SyntheticaRootPaneUI.this.snapThreshold) && (localPoint3.x < j - SyntheticaRootPaneUI.this.snapThreshold))
+/*      */             {
+/* 1553 */               disposeSnapWindow();
+/*      */             }
+/*      */           }
+/* 1556 */           if ((SyntheticaRootPaneUI.this.snapState == null) || (this.snapWindow != null)) {
+/*      */             return;
+/*      */           }
+/* 1558 */           if ((SyntheticaRootPaneUI.this.snapState == SyntheticaRootPaneUI.SnapState.SNAP_HEIGHT) && (localPoint1.y < this.minimumYPos + SyntheticaRootPaneUI.this.snapHeightThreshold)) {
+/*      */             return;
+/*      */           }
+/* 1562 */           int n = SyntheticaLookAndFeel.getInt("Synthetica.rootPane.snap.restoreThreshold", SyntheticaRootPaneUI.this.window, 0);
+/* 1563 */           int i1 = (Math.abs(this.dragStartOnScreen.x - paramMouseEvent.getXOnScreen()) <= n) && (Math.abs(this.dragStartOnScreen.y - paramMouseEvent.getYOnScreen()) <= n) ? 0 : 1;
+/* 1564 */           if (i1 == 0) {
+/*      */             return;
+/*      */           }
+/* 1566 */           unsnap((!this.liveDrag) && (this.dragResizeWindow != null) ? this.dragResizeWindow : SyntheticaRootPaneUI.this.window);
+/* 1568 */           if (this.dragXOffset <= 0) {
+/* 1569 */             this.dragXOffset = (SyntheticaRootPaneUI.this.window.getWidth() / 2);
+/*      */           }
+/* 1570 */           if (this.dragYOffset > 0) {
+/*      */             return;
+/*      */           }
+/* 1571 */           this.dragYOffset = (SyntheticaRootPaneUI.this.titlePane.getHeight() / 2);
+/*      */         }
+/*      */         catch (PrivilegedActionException localPrivilegedActionException) {}
+/*      */       }
+/* 1583 */       else if (this.windowAction == 2)
+/*      */       {
+/* 1586 */         if ((SyntheticaRootPaneUI.this.isSnapEnabled(SyntheticaRootPaneUI.this.window)) && ((this.resizeType == 9) || (this.resizeType == 8)) && (SyntheticaRootPaneUI.this.snapState != null)) {
+/* 1587 */           resetSnapState();
+/*      */         }
+/* 1589 */         Point localPoint2 = getPoint(paramMouseEvent);
+/* 1590 */         Dimension localDimension = (Dimension)SyntheticaLookAndFeel.get("Synthetica.rootPane.minimumWindowSize", SyntheticaRootPaneUI.this.window);
+/* 1593 */         if ((SyntheticaLookAndFeel.getBoolean("Synthetica.rootPane.fallBelowMinimumWindowSize", SyntheticaRootPaneUI.this.window, true)) && ((paramMouseEvent.getModifiers() & 0x2) != 0)) {
+/* 1594 */           localDimension = new Dimension(4, 4);
+/*      */         }
+/* 1596 */         if (localDimension == null) {
+/* 1597 */           localDimension = SyntheticaRootPaneUI.this.window.getMinimumSize();
+/*      */         }
+/* 1598 */         this.resizeBounds = SyntheticaRootPaneUI.this.window.getBounds();
+/* 1599 */         localObject = new Rectangle(this.resizeBounds);
+/* 1601 */         if ((this.resizeType == 11) || 
+/* 1602 */           (this.resizeType == 7) || 
+/* 1603 */           (this.resizeType == 5)) {
+/* 1605 */           this.resizeBounds.width = Math.max(localDimension.width, this.dragDimension.width + localPoint2.x - this.dragXOffset);
+/*      */         }
+/* 1608 */         if ((this.resizeType == 9) || 
+/* 1609 */           (this.resizeType == 4) || 
+/* 1610 */           (this.resizeType == 5))
+/*      */         {
+/* 1612 */           this.resizeBounds.height = Math.max(localDimension.height, this.dragDimension.height + localPoint2.y - this.dragYOffset);
+/* 1613 */           if ((SyntheticaRootPaneUI.this.isSnapEnabled(SyntheticaRootPaneUI.this.window)) && (this.resizeType == 9)) {
+/* 1614 */             setSnapHeightState();
+/*      */           }
+/*      */         }
+/*      */         int m;
+/* 1617 */         if ((this.resizeType == 8) || 
+/* 1618 */           (this.resizeType == 6) || 
+/* 1619 */           (this.resizeType == 7))
+/*      */         {
+/* 1621 */           m = localPoint2.y - this.dragYOffset;
+/* 1622 */           this.resizeBounds.y += m;
+/* 1623 */           this.resizeBounds.height -= m;
+/* 1624 */           if (this.resizeBounds.height < localDimension.height)
+/*      */           {
+/* 1626 */             this.resizeBounds.y += this.resizeBounds.height - localDimension.height;
+/* 1627 */             this.resizeBounds.height = localDimension.height;
+/*      */           }
+/* 1629 */           if ((SyntheticaRootPaneUI.this.isSnapEnabled(SyntheticaRootPaneUI.this.window)) && (this.resizeType == 8)) {
+/* 1630 */             setSnapHeightState();
+/*      */           }
+/*      */         }
+/* 1633 */         if ((this.resizeType == 10) || 
+/* 1634 */           (this.resizeType == 6) || 
+/* 1635 */           (this.resizeType == 4))
+/*      */         {
+/* 1637 */           m = localPoint2.x - this.dragXOffset;
+/* 1638 */           this.resizeBounds.x += m;
+/* 1639 */           this.resizeBounds.width -= m;
+/* 1640 */           if (this.resizeBounds.width < localDimension.width)
+/*      */           {
+/* 1642 */             this.resizeBounds.x += this.resizeBounds.width - localDimension.width;
+/* 1643 */             this.resizeBounds.width = localDimension.width;
+/*      */           }
+/*      */         }
+/* 1648 */         if ((bool1) && (this.resizeBounds.y < this.minimumYPos)) {
+/* 1649 */           this.resizeBounds.y = this.minimumYPos;
+/*      */         }
+/* 1651 */         if (!this.resizeBounds.equals(localObject)) {
+/* 1653 */           if (this.liveResize) {
+/* 1654 */             SyntheticaRootPaneUI.this.window.setBounds(this.resizeBounds);
+/*      */           } else {
+/* 1656 */             this.dragResizeWindow.setBounds(this.resizeBounds);
+/*      */           }
+/*      */         }
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     private void setSnapHeightState()
+/*      */     {
+/*      */       try
+/*      */       {
+/* 1665 */         Point localPoint = (Point)AccessController.doPrivileged(this.locationAction);
+/* 1666 */         int i = this.maximumYPos + SyntheticaRootPaneUI.this.rootPane.getInsets().top + SyntheticaRootPaneUI.this.titlePane.getHeight() - 1;
+/* 1667 */         if (((localPoint.y <= this.minimumYPos) || (localPoint.y >= i)) && (this.snapWindow == null))
+/*      */         {
+/* 1669 */           this.tmpSnapState = SyntheticaRootPaneUI.SnapState.SNAP_HEIGHT;
+/* 1670 */           this.snapWindow = createSnapWindow();
+/* 1671 */           this.snapWindow.setCursor(Cursor.getPredefinedCursor(8));
+/* 1672 */           Rectangle localRectangle1 = SyntheticaRootPaneUI.this.getMaximizedBounds(SyntheticaRootPaneUI.this.window.getGraphicsConfiguration(), true, true);
+/* 1673 */           Rectangle localRectangle2 = SyntheticaRootPaneUI.this.window.getBounds();
+/* 1674 */           localRectangle1.x = localRectangle2.x;
+/* 1675 */           localRectangle1.width = localRectangle2.width;
+/* 1676 */           this.snapWindow.setBounds(localRectangle1);
+/* 1677 */           this.snapWindow.setVisible(true);
+/*      */         }
+/* 1679 */         else if ((this.snapWindow != null) && (localPoint.y > this.minimumYPos + SyntheticaRootPaneUI.this.snapThreshold) && (localPoint.y < i - SyntheticaRootPaneUI.this.snapThreshold))
+/*      */         {
+/* 1680 */           disposeSnapWindow();
+/*      */         }
+/*      */       }
+/*      */       catch (PrivilegedActionException localPrivilegedActionException) {}
+/*      */     }
+/*      */     
+/*      */     public void mouseClicked(MouseEvent paramMouseEvent)
+/*      */     {
+/* 1691 */       if (this.frame == null) {
+/* 1691 */         return;
+/*      */       }
+/* 1693 */       Point localPoint = SwingUtilities.convertPoint(SyntheticaRootPaneUI.this.window, getPoint(paramMouseEvent), SyntheticaRootPaneUI.this.titlePane);
+/* 1694 */       if ((SyntheticaRootPaneUI.this.titlePane != null) && (SyntheticaRootPaneUI.this.titlePane.contains(localPoint)) && 
+/* 1695 */         (paramMouseEvent.getClickCount() == 2) && 
+/* 1696 */         ((paramMouseEvent.getModifiers() & 0x10) == 16)) {
+/* 1698 */         if (SyntheticaRootPaneUI.this.snapState != null)
+/*      */         {
+/* 1700 */           if (SyntheticaRootPaneUI.this.isMaximized(this.frame)) {
+/* 1701 */             ((SyntheticaTitlePane)SyntheticaRootPaneUI.this.titlePane).restore();
+/*      */           }
+/* 1702 */           SyntheticaRootPaneUI.this.restoreSnappedWindow(this.frame, this.frame.getGraphicsConfiguration(), true);
+/*      */         }
+/* 1704 */         else if ((this.frame.isResizable()) && (isFrameResizable()))
+/*      */         {
+/* 1706 */           ((SyntheticaTitlePane)SyntheticaRootPaneUI.this.titlePane).maximize();
+/*      */         }
+/* 1708 */         else if ((this.frame.isResizable()) && (!isFrameResizable()))
+/*      */         {
+/* 1710 */           ((SyntheticaTitlePane)SyntheticaRootPaneUI.this.titlePane).restore();
+/*      */         }
+/*      */       }
+/*      */     }
+/*      */     
+/*      */     private int position2Cursor(Window paramWindow, int paramInt1, int paramInt2)
+/*      */     {
+/* 1719 */       int i = paramWindow.getWidth();
+/* 1720 */       int j = paramWindow.getHeight();
+/* 1722 */       if ((paramInt1 < SyntheticaRootPaneUI.this.resizeInsets.left) && (paramInt2 < SyntheticaRootPaneUI.this.resizeInsets.top)) {
+/* 1723 */         return 6;
+/*      */       }
+/* 1724 */       if ((paramInt1 > i - SyntheticaRootPaneUI.this.resizeInsets.right) && (paramInt2 < SyntheticaRootPaneUI.this.resizeInsets.top)) {
+/* 1725 */         return 7;
+/*      */       }
+/* 1726 */       if ((paramInt1 < SyntheticaRootPaneUI.this.resizeInsets.left) && (paramInt2 > j - SyntheticaRootPaneUI.this.resizeInsets.bottom)) {
+/* 1727 */         return 4;
+/*      */       }
+/* 1728 */       if ((paramInt1 > i - SyntheticaRootPaneUI.this.resizeInsets.right) && (paramInt2 > j - SyntheticaRootPaneUI.this.resizeInsets.bottom)) {
+/* 1729 */         return 5;
+/*      */       }
+/* 1731 */       if (paramInt1 < SyntheticaRootPaneUI.this.resizeInsets.left) {
+/* 1732 */         return 10;
+/*      */       }
+/* 1733 */       if (paramInt1 > i - SyntheticaRootPaneUI.this.resizeInsets.right) {
+/* 1734 */         return 11;
+/*      */       }
+/* 1735 */       if (paramInt2 < SyntheticaRootPaneUI.this.resizeInsets.top) {
+/* 1736 */         return 8;
+/*      */       }
+/* 1737 */       if (paramInt2 > j - SyntheticaRootPaneUI.this.resizeInsets.bottom) {
+/* 1738 */         return 9;
+/*      */       }
+/* 1740 */       return 0;
+/*      */     }
+/*      */     
+/*      */     private JWindow createDragResizeWindow()
+/*      */     {
+/* 1746 */       JWindow localJWindow = new JWindow(SyntheticaRootPaneUI.this.window);
+/* 1748 */       if (OS.getCurrentOS() == OS.Mac) {
+/* 1749 */         localJWindow.getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);
+/*      */       }
+/* 1750 */       localJWindow.getRootPane().setContentPane(new JComponent()
+/*      */       {
+/*      */         public void paintComponent(Graphics paramAnonymousGraphics)
+/*      */         {
+/* 1754 */           super.paintComponents(paramAnonymousGraphics);
+/* 1755 */           SyntheticaRootPaneUI.MouseInputHandler.this.paintResizeBackground(SyntheticaRootPaneUI.this.rootPane, paramAnonymousGraphics, 0, 0, getWidth(), getHeight());
+/*      */         }
+/* 1757 */       });
+/* 1758 */       SyntheticaLookAndFeel.setWindowOpaque(localJWindow, false);
+/* 1759 */       return localJWindow;
+/*      */     }
+/*      */     
+/*      */     private JWindow createSnapWindow()
+/*      */     {
+/* 1765 */       JWindow localJWindow = new JWindow();
+/* 1767 */       if (OS.getCurrentOS() == OS.Mac) {
+/* 1768 */         localJWindow.getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);
+/*      */       }
+/* 1769 */       localJWindow.getRootPane().setContentPane(new JComponent()
+/*      */       {
+/*      */         public void paintComponent(Graphics paramAnonymousGraphics)
+/*      */         {
+/* 1773 */           super.paintComponents(paramAnonymousGraphics);
+/* 1774 */           SyntheticaRootPaneUI.MouseInputHandler.this.paintSnapBackground(SyntheticaRootPaneUI.this.rootPane, paramAnonymousGraphics, 0, 0, getWidth(), getHeight());
+/*      */         }
+/* 1776 */       });
+/* 1777 */       SyntheticaLookAndFeel.setWindowOpaque(localJWindow, false);
+/* 1778 */       return localJWindow;
+/*      */     }
+/*      */     
+/*      */     private void paintResizeBackground(JRootPane paramJRootPane, Graphics paramGraphics, int paramInt1, int paramInt2, int paramInt3, int paramInt4)
+/*      */     {
+/* 1783 */       RootPanePainter.getInstance().paintResizeBackground(paramJRootPane, null, paramGraphics, paramInt1, paramInt2, paramInt3, paramInt4);
+/*      */     }
+/*      */     
+/*      */     private void paintSnapBackground(JRootPane paramJRootPane, Graphics paramGraphics, int paramInt1, int paramInt2, int paramInt3, int paramInt4)
+/*      */     {
+/* 1788 */       RootPanePainter.getInstance().paintSnapBackground(paramJRootPane, null, paramGraphics, paramInt1, paramInt2, paramInt3, paramInt4);
+/*      */     }
+/*      */     
+/*      */     private boolean isFrameResizable()
+/*      */     {
+/* 1795 */       return (this.frame != null) && (this.frame.isResizable()) && ((this.frame.getExtendedState() & 0x6) == 0);
+/*      */     }
+/*      */     
+/*      */     private boolean isDialogResizable()
+/*      */     {
+/* 1802 */       return (this.dialog != null) && (this.dialog.isResizable());
+/*      */     }
+/*      */     
+/*      */     private boolean isWindowResizable()
+/*      */     {
+/* 1809 */       return (isFrameResizable()) || (isDialogResizable());
+/*      */     }
+/*      */     
+/*      */     public boolean isResizing()
+/*      */     {
+/* 1817 */       return this.windowAction == 2;
+/*      */     }
+/*      */   }
+/*      */   
+/*      */   public static class MouseEventProcessor
+/*      */   {
+/*      */     public void process(JRootPane paramJRootPane, MouseEvent paramMouseEvent)
+/*      */     {
+/* 1838 */       Component localComponent = paramMouseEvent.getComponent();
+/* 1839 */       int i = paramMouseEvent.getID();
+/*      */       
+/* 1841 */       int j = SwingUtilities.getAncestorOfClass(SyntheticaTitlePane.class, localComponent) != null ? 1 : 0;
+/* 1842 */       if ((localComponent.getCursor() != Cursor.getDefaultCursor()) && ((j != 0) || ((localComponent instanceof MenuElement))))
+/*      */       {
+/* 1844 */         Window localWindow = SwingUtilities.getWindowAncestor(paramJRootPane);
+/* 1845 */         localWindow.setCursor(Cursor.getDefaultCursor());
+/*      */       }
+/* 1848 */       int k = (j == 0) && (!(localComponent instanceof MenuElement)) ? 0 : 1;
+/* 1849 */       if (k != 0) {
+/* 1850 */         return;
+/*      */       }
+/* 1852 */       MouseInputListener localMouseInputListener = ((SyntheticaRootPaneUI)paramJRootPane.getUI()).getMouseInputListener();
+/* 1853 */       if (localMouseInputListener == null) {
+/* 1854 */         return;
+/*      */       }
+/* 1856 */       if (i == 500) {
+/* 1857 */         localMouseInputListener.mouseClicked(paramMouseEvent);
+/* 1858 */       } else if (i == 506) {
+/* 1859 */         localMouseInputListener.mouseDragged(paramMouseEvent);
+/* 1860 */       } else if (i == 504) {
+/* 1861 */         localMouseInputListener.mouseEntered(paramMouseEvent);
+/* 1862 */       } else if (i == 505) {
+/* 1863 */         localMouseInputListener.mouseExited(paramMouseEvent);
+/* 1864 */       } else if (i == 503) {
+/* 1865 */         localMouseInputListener.mouseMoved(paramMouseEvent);
+/* 1866 */       } else if (i == 501) {
+/* 1867 */         localMouseInputListener.mousePressed(paramMouseEvent);
+/* 1868 */       } else if (i == 502) {
+/* 1869 */         localMouseInputListener.mouseReleased(paramMouseEvent);
+/*      */       }
+/* 1871 */       if (((localMouseInputListener instanceof SyntheticaRootPaneUI.MouseInputHandler)) && (((SyntheticaRootPaneUI.MouseInputHandler)localMouseInputListener).isResizing())) {
+/* 1872 */         paramMouseEvent.consume();
+/*      */       }
+/*      */     }
+/*      */   }
+/*      */ }
+
+
+/* Location:           C:\Users\Himanshu\Desktop\Java_theme\
+ * Qualified Name:     de.javasoft.plaf.synthetica.SyntheticaRootPaneUI
+ * JD-Core Version:    0.7.0.1
+ */
